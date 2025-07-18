@@ -1,0 +1,45 @@
+{
+  "dashboard_highlight": ["coolant_temp", "battery_voltage"],
+  "categories": {
+    "ENGINE SYSTEM": [
+      "rpm", "load", "coolant_temp", "intake_air_temp", "throttle_pos", "maf", "fuel_level",
+      "injection_time", "map", "timing_advance", "ignition_timing", "short_term_fuel_trim",
+      "long_term_fuel_trim", "oxygen_sensor_voltage", "fuel_pump", "glow_plug"
+    ],
+    "VEHICLE SYSTEM": [
+      "vehicle_speed", "accelerator_pos_1", "accelerator_pos_2"
+    ],
+    "BATTERY SYSTEM": [
+      "battery_voltage", "battery_current", "battery_soc", "battery_temp"
+    ],
+    "BRAKE SYSTEM": [
+      "brake_vacuum", "brake_stroke", "brake_sensor"
+    ],
+    "HVAC SYSTEM": [
+      "ac_clutch_status"
+    ],
+    "ENVIRONMENT SYSTEM": [
+      "barometric_pressure", "ambient_temp"
+    ],
+    "DIAGNOSTIC SYSTEM": [
+      "dtc_status", "monitor_status", "obd_type", "fuel_system_status",
+      "engine_runtime", "distance_with_mil", "egr_status", "evap_purge"
+    ]
+  },
+  "ai_analysis_questions": [
+    {
+      "id": "odometer_km",
+      "question": "Berapa KM total yang sudah ditempuh mobil Anda saat ini?",
+      "type": "number",
+      "unit": "km",
+      "required": true
+    },
+    {
+      "id": "service_last_km",
+      "question": "Pada KM berapa terakhir mobil Anda diservis?",
+      "type": "number",
+      "unit": "km",
+      "required": false
+    }
+  ]
+}
