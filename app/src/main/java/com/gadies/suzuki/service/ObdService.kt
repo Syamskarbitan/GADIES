@@ -41,7 +41,7 @@ class ObdService : Service() {
     private var inputStream: InputStream? = null
     private var outputStream: OutputStream? = null
     
-    private val _connectionState = MutableStateFlow(ConnectionState())
+    private val _connectionState = MutableStateFlow(ConnectionState(status = ConnectionStatus.DISCONNECTED))
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
     
     private var pollingJob: Job? = null

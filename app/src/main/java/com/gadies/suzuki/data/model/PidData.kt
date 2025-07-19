@@ -11,7 +11,7 @@ data class PidData(
     val unit: String,
     val formula: String,
     val bytes: Int,
-    val category: String,
+    val category: PidCategory,
     val uiType: String,
     val subCategory: PidSubCategory? = null,
     val threshold: Threshold? = null,
@@ -41,16 +41,7 @@ data class DoubleRange(
     val end: Double
 ) : Parcelable
 
-enum class PidCategory(val displayName: String) {
-    ENGINE("ENGINE SYSTEM"),
-    VEHICLE("VEHICLE SYSTEM"), 
-    BATTERY("BATTERY/ELECTRICAL SYSTEM"),
-    BRAKE("BRAKE SYSTEM"),
-    HVAC("HVAC SYSTEM"),
-    ENVIRONMENT("ENVIRONMENT SYSTEM"),
-    DIAGNOSTIC("DIAGNOSTIC SYSTEM")
-}
-
+// HANYA ADA SATU DEFINISI ENUM INI
 enum class PidSubCategory(val displayName: String, val category: PidCategory) {
     // ENGINE SYSTEM sub-categories
     ENGINE_PERFORMANCE("Engine Performance", PidCategory.ENGINE),
@@ -61,33 +52,27 @@ enum class PidSubCategory(val displayName: String, val category: PidCategory) {
     IGNITION_TIMING("Ignition & Timing", PidCategory.ENGINE),
     OXYGEN_SENSORS("Oxygen Sensors", PidCategory.ENGINE),
     ENGINE_CONTROL_RELAYS("Engine Control Relays", PidCategory.ENGINE),
-    
+
     // VEHICLE SYSTEM sub-categories
     SPEED_MOVEMENT("Speed & Movement", PidCategory.VEHICLE),
     PEDAL_POSITION("Pedal Position", PidCategory.VEHICLE),
-    
+
     // BATTERY/ELECTRICAL SYSTEM sub-categories
     VOLTAGE_CURRENT("Voltage & Current", PidCategory.BATTERY),
     STATUS_HEALTH("Status & Health", PidCategory.BATTERY),
     ISG_SYSTEM("ISG System", PidCategory.BATTERY),
-    
+
     // BRAKE SYSTEM sub-categories
     VACUUM_STROKE_SENSORS("Vacuum & Stroke Sensors", PidCategory.BRAKE),
-    
+
     // HVAC SYSTEM sub-categories
     AC_RELAY("A/C Relay", PidCategory.HVAC),
-    
+
     // ENVIRONMENT SYSTEM sub-categories
     AMBIENT_BAROMETRIC("Ambient & Barometric Pressure", PidCategory.ENVIRONMENT),
-    
+
     // DIAGNOSTIC SYSTEM sub-categories
     RUNTIME_MIL_OBD("Runtime, MIL, OBD Type, Emission Systems", PidCategory.DIAGNOSTIC)
-}
-
-enum class AlertLevel {
-    NORMAL,
-    CAUTION, 
-    DANGER
 }
 
 data class PidAlert(

@@ -3,6 +3,7 @@ package com.gadies.suzuki.data.repository
 import android.content.Context
 import com.gadies.suzuki.data.model.PidData
 import com.gadies.suzuki.data.model.PidCategory
+import com.gadies.suzuki.data.model.ThresholdsData
 import com.google.gson.Gson
 import io.mockk.every
 import io.mockk.mockk
@@ -25,8 +26,10 @@ class PidRepositoryTest {
             "version": "1.0",
             "description": "Test thresholds"
         },
-        "standard_obd2": {
-            "01_05": {
+        "standard_obdii_pids": [
+            {
+                "mode": "01",
+                "pid": "05",
                 "name": "Engine Coolant Temperature",
                 "unit": "°C",
                 "formula": "A-40",
@@ -41,9 +44,9 @@ class PidRepositoryTest {
                     "danger": {"start": 110, "end": 215}
                 }
             }
-        },
-        "suzuki_custom": {},
-        "d13a_ecu": {}
+        ],
+        "suzuki_custom_pids": [],
+        "suzuki_d13a_02_pids": []
     }
     """.trimIndent()
 
@@ -67,7 +70,7 @@ class PidRepositoryTest {
         assertNotNull("PID data should not be null", pidData)
         assertEquals("Engine Coolant Temperature", pidData?.name)
         assertEquals("°C", pidData?.unit)
-        assertEquals("ENGINE", pidData?.category)
+        assertEquals(PidCategory.ENGINE, pidData?.category)
     }
 
     @Test
@@ -91,18 +94,14 @@ class PidRepositoryTest {
         assertTrue("Dashboard PIDs should not be empty", dashboardPids.isNotEmpty())
         
         // Check if coolant temperature PID is in dashboard
-        val coolantPid = dashboardPids.find { it.pid == "01_05" }
+        val coolantPid = dashboardPids.find { it.pid == "05" }
         assertNotNull("Coolant temperature should be in dashboard PIDs", coolantPid)
     }
 
     @Test
     fun `test PID data update`() = runTest {
-        val testPidData = mapOf(
-            "01_05" to 85.0,
-            "01_0C" to 2500.0
-        )
-        
-        pidRepository.updatePidData(testPidData)
+        // Update with a specific value
+        pidRepository.updatePidValue("01_05", 85.0, "FF")
         
         val pidDataMap = pidRepository.pidDataMap.first()
         val coolantPid = pidDataMap["01_05"]
@@ -115,16 +114,14 @@ class PidRepositoryTest {
     @Test
     fun `test alert generation for threshold violation`() = runTest {
         // Update with high temperature (danger zone)
-        val testPidData = mapOf("01_05" to 115.0) // Above danger threshold
-        
-        pidRepository.updatePidData(testPidData)
+        pidRepository.updatePidValue("01_05", 115.0, "FF") // Above danger threshold
         
         val alerts = pidRepository.alerts.first()
         
         // Should generate alert for high temperature
         assertTrue("Should have alerts for high temperature", alerts.isNotEmpty())
         
-        val coolantAlert = alerts.find { it.pidId == "01_05" }
+        val coolantAlert = alerts.find { it.pid == "01_05" }
         assertNotNull("Should have alert for coolant temperature", coolantAlert)
     }
 }

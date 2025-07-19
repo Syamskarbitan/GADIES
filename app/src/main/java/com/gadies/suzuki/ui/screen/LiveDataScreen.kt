@@ -3,6 +3,7 @@ package com.gadies.suzuki.ui.screen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.navigation.NavController
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,6 +33,7 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveDataScreen(
+    navController: NavController,
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val categorizedPids by viewModel.categorizedPids.collectAsState()
@@ -205,7 +208,7 @@ fun PidCategoryCard(
                                                 )
                                                 if (pid != subCategoryPids.last()) {
                                                     Spacer(modifier = Modifier.height(8.dp))
-                                                }\n                                            }
+                                                }}
                                         }
                                     }
                                 }
@@ -345,7 +348,9 @@ fun PidDataRow(
                             onCheckedChange = { enabled ->
                                 onToggleAlert(pidData.pid, enabled)
                             },
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier
+                                .size(24.dp)
+                                .testTag("alert_toggle_${pidData.pid}")
                         )
                     }
                 }
@@ -358,22 +363,34 @@ fun PidDataRow(
 fun CategoryIcon(category: PidCategory) {
     val icon = when (category) {
         PidCategory.ENGINE -> Icons.Default.Settings
+        PidCategory.TRANSMISSION -> Icons.Default.Settings
         PidCategory.VEHICLE -> Icons.Default.DirectionsCar
         PidCategory.BATTERY -> Icons.Default.BatteryFull
         PidCategory.BRAKE -> Icons.Default.Warning
         PidCategory.HVAC -> Icons.Default.Thermostat
         PidCategory.ENVIRONMENT -> Icons.Default.Cloud
         PidCategory.DIAGNOSTIC -> Icons.Default.BugReport
+        PidCategory.EMISSIONS -> Icons.Default.Air
+        PidCategory.FUEL -> Icons.Default.LocalGasStation
+        PidCategory.ELECTRICAL -> Icons.Default.ElectricBolt
+        PidCategory.CHASSIS -> Icons.Default.DirectionsCar
+        PidCategory.BODY -> Icons.Default.CardTravel
     }
     
     val iconColor = when (category) {
         PidCategory.ENGINE -> Color(0xFFFF5722)
+        PidCategory.TRANSMISSION -> Color(0xFFFF9800)
         PidCategory.VEHICLE -> Color(0xFF2196F3)
         PidCategory.BATTERY -> Color(0xFF4CAF50)
         PidCategory.BRAKE -> Color(0xFFFF9800)
         PidCategory.HVAC -> Color(0xFF9C27B0)
         PidCategory.ENVIRONMENT -> Color(0xFF00BCD4)
         PidCategory.DIAGNOSTIC -> Color(0xFF795548)
+        PidCategory.EMISSIONS -> Color(0xFF4CAF50)
+        PidCategory.FUEL -> Color(0xFFFF5722)
+        PidCategory.ELECTRICAL -> Color(0xFFFFC107)
+        PidCategory.CHASSIS -> Color(0xFF607D8B)
+        PidCategory.BODY -> Color(0xFF9E9E9E)
     }
     
     Box(

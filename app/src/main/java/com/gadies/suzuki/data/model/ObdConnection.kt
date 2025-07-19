@@ -1,11 +1,5 @@
 package com.gadies.suzuki.data.model
 
-enum class ConnectionType {
-    BLUETOOTH,
-    WIFI,
-    NONE
-}
-
 enum class ConnectionStatus {
     DISCONNECTED,
     CONNECTING,
@@ -17,7 +11,8 @@ data class ObdDevice(
     val name: String,
     val address: String,
     val type: ConnectionType,
-    val isAvailable: Boolean = true
+    val isAvailable: Boolean = true,
+    val rssi: Int? = null // For Bluetooth devices
 )
 
 data class ConnectionState(

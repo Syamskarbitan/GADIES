@@ -89,16 +89,16 @@ fun AiAnalysisScreen(
             }
             
             // Previous Analysis Results
-            when (aiAnalysisState) {
+            when (val currentState = aiAnalysisState) {
                 is AiAnalysisState.Success -> {
                     AnalysisResultCard(
-                        result = aiAnalysisState.response,
+                        result = currentState.response,
                         onStartChat = { navController.navigate("ai_chat") }
                     )
                 }
                 is AiAnalysisState.Error -> {
                     ErrorCard(
-                        message = aiAnalysisState.message,
+                        message = currentState.message,
                         onRetry = { viewModel.resetAiAnalysis() }
                     )
                 }

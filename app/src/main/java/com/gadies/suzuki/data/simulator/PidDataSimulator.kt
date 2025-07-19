@@ -2,6 +2,7 @@ package com.gadies.suzuki.data.simulator
 
 import com.gadies.suzuki.data.model.PidData
 import com.gadies.suzuki.data.model.PidMapping
+import com.gadies.suzuki.data.model.PidCategory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -282,7 +283,7 @@ class PidDataSimulator(private val scope: CoroutineScope) {
             unit = unit,
             formula = "A", // Simplified formula
             bytes = 1,
-            category = subCategory?.category?.displayName ?: "Unknown",
+            category = subCategory?.category ?: PidCategory.DIAGNOSTIC,
             uiType = "gauge",
             subCategory = subCategory,
             currentValue = value,

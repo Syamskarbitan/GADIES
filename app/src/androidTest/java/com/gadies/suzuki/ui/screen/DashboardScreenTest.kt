@@ -2,9 +2,15 @@ package com.gadies.suzuki.ui.screen
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.gadies.suzuki.data.model.*
+import com.gadies.suzuki.data.model.ConnectionStatus
 import com.gadies.suzuki.ui.theme.GADIESTheme
+import com.gadies.suzuki.ui.viewmodel.MainViewModel
+import io.mockk.mockk
+import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
@@ -15,6 +21,13 @@ class DashboardScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+    
+    private lateinit var mockViewModel: MainViewModel
+
+    @org.junit.Before
+    fun setup() {
+        mockViewModel = mockk(relaxed = true)
+    }
 
     private val mockCoolantPid = PidData(
         pid = "01_05",
@@ -23,7 +36,7 @@ class DashboardScreenTest {
         unit = "°C",
         formula = "A-40",
         bytes = 1,
-        category = "ENGINE",
+        category = PidCategory.ENGINE,
         uiType = "gauge",
         currentValue = 85.0,
         hasData = true,
@@ -35,13 +48,13 @@ class DashboardScreenTest {
     )
 
     private val mockBatteryPid = PidData(
-        pid = "21_08",
-        mode = "21",
-        name = "Battery Voltage",
+        pid = "01_42",
+        mode = "01",
+        name = "Control Module Voltage",
         unit = "V",
-        formula = "A*0.1",
-        bytes = 1,
-        category = "BATTERY",
+        formula = "((A*256)+B)/1000",
+        bytes = 2,
+        category = PidCategory.ENGINE,
         uiType = "gauge",
         currentValue = 12.5,
         hasData = true,
@@ -57,13 +70,8 @@ class DashboardScreenTest {
         composeTestRule.setContent {
             GADIESTheme {
                 DashboardScreen(
-                    connectionState = MutableStateFlow(ConnectionState.CONNECTED),
-                    coolantTemperaturePid = MutableStateFlow(mockCoolantPid),
-                    batteryVoltagePid = MutableStateFlow(mockBatteryPid),
-                    alerts = MutableStateFlow(emptyList()),
-                    onNavigateToLiveData = {},
-                    onNavigateToConnection = {},
-                    onNavigateToSettings = {}
+                    navController = rememberNavController(),
+                    viewModel = mockViewModel
                 )
             }
         }
@@ -78,13 +86,8 @@ class DashboardScreenTest {
         composeTestRule.setContent {
             GADIESTheme {
                 DashboardScreen(
-                    connectionState = MutableStateFlow(ConnectionState.CONNECTED),
-                    coolantTemperaturePid = MutableStateFlow(mockCoolantPid),
-                    batteryVoltagePid = MutableStateFlow(mockBatteryPid),
-                    alerts = MutableStateFlow(emptyList()),
-                    onNavigateToLiveData = {},
-                    onNavigateToConnection = {},
-                    onNavigateToSettings = {}
+                    navController = rememberNavController(),
+                    viewModel = mockViewModel
                 )
             }
         }
@@ -99,13 +102,8 @@ class DashboardScreenTest {
         composeTestRule.setContent {
             GADIESTheme {
                 DashboardScreen(
-                    connectionState = MutableStateFlow(ConnectionState.CONNECTED),
-                    coolantTemperaturePid = MutableStateFlow(mockCoolantPid),
-                    batteryVoltagePid = MutableStateFlow(mockBatteryPid),
-                    alerts = MutableStateFlow(emptyList()),
-                    onNavigateToLiveData = {},
-                    onNavigateToConnection = {},
-                    onNavigateToSettings = {}
+                    navController = rememberNavController(),
+                    viewModel = mockViewModel
                 )
             }
         }
@@ -124,19 +122,14 @@ class DashboardScreenTest {
         composeTestRule.setContent {
             GADIESTheme {
                 DashboardScreen(
-                    connectionState = MutableStateFlow(ConnectionState.CONNECTED),
-                    coolantTemperaturePid = MutableStateFlow(mockCoolantPid),
-                    batteryVoltagePid = MutableStateFlow(mockBatteryPid),
-                    alerts = MutableStateFlow(emptyList()),
-                    onNavigateToLiveData = {},
-                    onNavigateToConnection = {},
-                    onNavigateToSettings = {}
+                    navController = rememberNavController(),
+                    viewModel = mockViewModel
                 )
             }
         }
 
         composeTestRule
-            .onNodeWithText("Battery Voltage")
+            .onNodeWithText("Control Module Voltage")
             .assertIsDisplayed()
         
         composeTestRule
@@ -149,13 +142,8 @@ class DashboardScreenTest {
         composeTestRule.setContent {
             GADIESTheme {
                 DashboardScreen(
-                    connectionState = MutableStateFlow(ConnectionState.CONNECTED),
-                    coolantTemperaturePid = MutableStateFlow(mockCoolantPid),
-                    batteryVoltagePid = MutableStateFlow(mockBatteryPid),
-                    alerts = MutableStateFlow(emptyList()),
-                    onNavigateToLiveData = {},
-                    onNavigateToConnection = {},
-                    onNavigateToSettings = {}
+                    navController = rememberNavController(),
+                    viewModel = mockViewModel
                 )
             }
         }
@@ -174,13 +162,8 @@ class DashboardScreenTest {
         composeTestRule.setContent {
             GADIESTheme {
                 DashboardScreen(
-                    connectionState = MutableStateFlow(ConnectionState.DISCONNECTED),
-                    coolantTemperaturePid = MutableStateFlow(null),
-                    batteryVoltagePid = MutableStateFlow(null),
-                    alerts = MutableStateFlow(emptyList()),
-                    onNavigateToLiveData = {},
-                    onNavigateToConnection = {},
-                    onNavigateToSettings = {}
+                    navController = rememberNavController(),
+                    viewModel = mockViewModel
                 )
             }
         }
@@ -196,9 +179,20 @@ class DashboardScreenTest {
 
     @Test
     fun dashboardScreen_displaysAlertsWhenPresent() {
+        val mockPidData = PidData(
+            pid = "01_05",
+            mode = "01",
+            name = "Engine Coolant Temperature",
+            unit = "°C",
+            formula = "A-40",
+            bytes = 1,
+            category = PidCategory.ENGINE,
+            uiType = "gauge",
+            currentValue = 95.0
+        )
+        
         val testAlert = PidAlert(
-            pidId = "01_05",
-            pidName = "Engine Coolant Temperature",
+            pidData = mockPidData,
             message = "High temperature detected",
             level = AlertLevel.DANGER,
             timestamp = System.currentTimeMillis()
@@ -207,13 +201,8 @@ class DashboardScreenTest {
         composeTestRule.setContent {
             GADIESTheme {
                 DashboardScreen(
-                    connectionState = MutableStateFlow(ConnectionState.CONNECTED),
-                    coolantTemperaturePid = MutableStateFlow(mockCoolantPid),
-                    batteryVoltagePid = MutableStateFlow(mockBatteryPid),
-                    alerts = MutableStateFlow(listOf(testAlert)),
-                    onNavigateToLiveData = {},
-                    onNavigateToConnection = {},
-                    onNavigateToSettings = {}
+                    navController = rememberNavController(),
+                    viewModel = mockViewModel
                 )
             }
         }
@@ -236,13 +225,8 @@ class DashboardScreenTest {
         composeTestRule.setContent {
             GADIESTheme {
                 DashboardScreen(
-                    connectionState = MutableStateFlow(ConnectionState.CONNECTED),
-                    coolantTemperaturePid = MutableStateFlow(mockCoolantPid),
-                    batteryVoltagePid = MutableStateFlow(mockBatteryPid),
-                    alerts = MutableStateFlow(emptyList()),
-                    onNavigateToLiveData = { liveDataClicked = true },
-                    onNavigateToConnection = { connectionClicked = true },
-                    onNavigateToSettings = { settingsClicked = true }
+                    navController = rememberNavController(),
+                    viewModel = mockViewModel
                 )
             }
         }

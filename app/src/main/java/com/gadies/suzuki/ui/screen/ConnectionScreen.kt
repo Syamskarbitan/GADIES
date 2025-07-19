@@ -449,6 +449,7 @@ fun DeviceItem(
                 imageVector = when (device.type) {
                     ConnectionType.BLUETOOTH -> Icons.Default.Bluetooth
                     ConnectionType.WIFI -> Icons.Default.Wifi
+                    ConnectionType.NONE -> Icons.Default.Close
                 },
                 contentDescription = "Device Type",
                 tint = if (isConnected) GadiesGreen else GadiesYellow,

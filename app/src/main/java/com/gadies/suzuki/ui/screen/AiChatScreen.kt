@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,19 +24,24 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gadies.suzuki.data.model.ChatMessage
-import com.gadies.suzuki.data.model.MessageSender
+
 import com.gadies.suzuki.ui.theme.*
 import com.gadies.suzuki.ui.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class,
+    androidx.compose.foundation.ExperimentalFoundationApi::class
+)
 @Composable
 fun AiChatScreen(
     navController: NavController,
-    viewModel: MainViewModel
+    viewModel: MainViewModel = hiltViewModel()
 ) {
     val chatMessages by viewModel.chatMessages.collectAsState()
     val isLoading by viewModel.isChatLoading.collectAsState()
@@ -190,7 +196,7 @@ fun WelcomeMessage() {
 
 @Composable
 fun ChatMessageBubble(message: ChatMessage) {
-    val isUser = message.sender == MessageSender.USER
+    val isUser = message.isFromUser
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     
     Row(

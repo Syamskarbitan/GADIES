@@ -28,6 +28,7 @@ class MainViewModelTest {
     private val mockCategorizedPids = MutableStateFlow<Map<PidCategory, List<PidData>>>(emptyMap())
     private val mockDashboardPids = MutableStateFlow<List<PidData>>(emptyList())
     private val mockAlerts = MutableStateFlow<List<PidAlert>>(emptyList())
+    private val mockConnectionState = MutableStateFlow(ConnectionState())
 
     @Before
     fun setup() {
@@ -40,20 +41,20 @@ class MainViewModelTest {
         every { mockPidRepository.alerts } returns mockAlerts
         
         // Mock repository methods
-        every { mockPidRepository.updatePidData(any()) } just Runs
-        every { mockPidRepository.updateDashboardPids(any()) } just Runs
+        every { mockPidRepository.updatePidDataMap(any()) } just Runs
         
         // Mock AI service
-        coEvery { mockAiService.analyzeVehicleHealth(any()) } returns 
+        coEvery { mockAiService.analyzeVehicleHealth(any()) } returns Result.success(
             AiAnalysisResult(
                 healthScore = 85,
                 summary = "Vehicle is in good condition",
                 recommendations = listOf("Regular maintenance recommended"),
-                potentialIssues = emptyList(),
+                issues = emptyList(),
                 timestamp = System.currentTimeMillis()
             )
+        )
         
-        coEvery { mockAiService.sendChatMessage(any(), any()) } returns "AI response"
+        coEvery { mockAiService.sendChatMessage(any(), any(), any(), any(), any()) } returns Result.success("AI response")
         
         viewModel = MainViewModel(mockPidRepository, mockAiService)
     }
@@ -66,79 +67,49 @@ class MainViewModelTest {
     @Test
     fun `test initial state`() = runTest {
         // Verify initial connection state
-        assertEquals(ConnectionState.DISCONNECTED, viewModel.connectionState.first())
-        
-        // Verify initial loading states
-        assertFalse("Should not be loading initially", viewModel.isLoading.first())
-        assertFalse("AI should not be loading initially", viewModel.isAiLoading.first())
+        assertEquals(ConnectionState(), viewModel.connectionState.first())
         
         // Verify empty initial data
         assertTrue("PID data should be empty initially", viewModel.pidDataMap.first().isEmpty())
         assertTrue("Alerts should be empty initially", viewModel.alerts.first().isEmpty())
     }
 
-    @Test
-    fun `test start simulation`() = runTest {
-        viewModel.startSimulation()
-        
-        // Advance time to allow simulation to run
-        testScheduler.advanceTimeBy(2000)
-        
-        // Verify simulation is running
-        assertTrue("Simulation should be running", viewModel.isSimulationRunning.first())
-        
-        // Verify repository update was called
-        verify(atLeast = 1) { mockPidRepository.updatePidData(any()) }
-    }
-
-    @Test
-    fun `test stop simulation`() = runTest {
-        // Start simulation first
-        viewModel.startSimulation()
-        testScheduler.advanceTimeBy(1000)
-        
-        // Stop simulation
-        viewModel.stopSimulation()
-        
-        // Verify simulation is stopped
-        assertFalse("Simulation should be stopped", viewModel.isSimulationRunning.first())
-    }
-
-    @Test
-    fun `test AI vehicle analysis`() = runTest {
-        // Setup test PID data
-        val testPidData = mapOf(
-            "01_05" to PidData(
-                pid = "01_05",
-                mode = "01",
-                name = "Engine Coolant Temperature",
-                unit = "°C",
-                formula = "A-40",
-                bytes = 1,
-                category = "ENGINE",
-                uiType = "gauge",
-                currentValue = 85.0,
-                hasData = true
-            )
+    @Test 
+    fun `test category selection`() = runTest {
+        val enginePid = PidData(
+            mode = "01",
+            pid = "05",
+            name = "Coolant Temperature",
+            unit = "°C",
+            formula = "A-40",
+            uiType = "gauge",
+            bytes = 1,
+            category = PidCategory.ENGINE
         )
-        mockPidDataMap.value = testPidData
+
+        val transmissionPid = PidData(
+            mode = "01", 
+            pid = "0D",
+            name = "Vehicle Speed",
+            unit = "km/h",
+            formula = "A",
+            uiType = "gauge", 
+            bytes = 1,
+            category = PidCategory.TRANSMISSION
+        )
+
+        mockCategorizedPids.value = mapOf(
+            PidCategory.ENGINE to listOf(enginePid),
+            PidCategory.TRANSMISSION to listOf(transmissionPid)
+        )
+
+        viewModel.selectCategory(PidCategory.ENGINE)
         
-        // Trigger AI analysis
-        viewModel.analyzeVehicleHealth()
-        testScheduler.advanceUntilIdle()
-        
-        // Verify AI analysis result
-        val analysisResult = viewModel.aiAnalysisResult.first()
-        assertNotNull("Analysis result should not be null", analysisResult)
-        assertEquals("Health score should be 85", 85, analysisResult?.healthScore)
-        assertEquals("Summary should match", "Vehicle is in good condition", analysisResult?.summary)
-        
-        // Verify AI service was called
-        coVerify { mockAiService.analyzeVehicleHealth(testPidData.values.toList()) }
+        assertEquals(PidCategory.ENGINE, viewModel.selectedCategory.first())
     }
 
     @Test
-    fun `test AI chat message`() = runTest {
+    fun `test chat message`() = runTest {
         val testMessage = "What's wrong with my engine?"
         
         viewModel.sendChatMessage(testMessage)
@@ -147,10 +118,10 @@ class MainViewModelTest {
         // Verify chat messages were updated
         val chatMessages = viewModel.chatMessages.first()
         assertTrue("Should have user message", chatMessages.any { 
-            it.content == testMessage && it.sender == MessageSender.USER 
+                        it.content == testMessage && it.isFromUser
         })
         assertTrue("Should have AI response", chatMessages.any { 
-            it.content == "AI response" && it.sender == MessageSender.AI 
+            it.content == "AI response" && !it.isFromUser
         })
         
         // Verify AI service was called

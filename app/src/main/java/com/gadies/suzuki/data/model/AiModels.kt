@@ -14,14 +14,10 @@ data class AiAnalysisResponse(
     val nextServiceKm: Int? = null
 )
 
-enum class MessageSender {
-    USER, AI
-}
-
-data class ChatMessage(
+data class AiChatMessage(
     val id: String = java.util.UUID.randomUUID().toString(),
     val content: String,
-    val sender: MessageSender,
+    val isFromUser: Boolean,
     val timestamp: Long = System.currentTimeMillis()
 )
 
