@@ -69,17 +69,10 @@ class MainViewModel @Inject constructor(
         // Initialize with empty states
         _connectionState.value = ConnectionState()
         _aiAnalysisState.value = AiAnalysisState.Idle
-        _settings.value = AppSettings() // DIUBAH: Menggunakan _settings yang benar
-
-        // Start simulator for testing (remove in production)
-        startPidDataSimulation()
-
-        // Observe simulated data
-        viewModelScope.launch {
-            pidDataSimulator.simulatedData.collect { simulatedData ->
-                pidRepository.updatePidDataMap(simulatedData)
-            }
-        }
+        _settings.value = AppSettings()
+        
+        // PRODUCTION: No mock data - only real OBD2 data after connection
+        // Data will only be populated when actual OBD2 device is connected
     }
 
     fun updateConnectionState(state: ConnectionState) {
@@ -178,31 +171,56 @@ class MainViewModel @Inject constructor(
         _settings.value = newSettings
     }
 
-    // Connection Management
-    fun scanForDevices() {
-        _isScanning.value = true
+    // OBD Service reference for real Bluetooth operations
+    private var obdService: com.gadies.suzuki.service.ObdService? = null
+    
+    fun setObdService(service: com.gadies.suzuki.service.ObdService) {
+        obdService = service
+        
+        // Observe real scanning state
         viewModelScope.launch {
-            kotlinx.coroutines.delay(3000)
-            _availableDevices.value = listOf(
-                ObdDevice(
-                    name = "ELM327 Bluetooth",
-                    address = "00:1D:A5:68:98:8B",
-                    type = ConnectionType.BLUETOOTH,
-                    rssi = -45
-                ),
-                ObdDevice(
-                    name = "OBD2 Scanner",
-                    address = "00:1A:7D:DA:71:13",
-                    type = ConnectionType.BLUETOOTH,
-                    rssi = -67
+            service.isScanning.collect { isScanning ->
+                _isScanning.value = isScanning
+            }
+        }
+        
+        // Observe discovered devices
+        viewModelScope.launch {
+            service.discoveredDevices.collect { devices ->
+                _availableDevices.value = devices
+            }
+        }
+        
+        // Observe connection state
+        viewModelScope.launch {
+            service.connectionState.collect { state ->
+                _connectionState.value = state
+            }
+        }
+    }
+    
+    // Connection Management - Real Bluetooth scanning
+    fun scanForDevices() {
+        obdService?.let { service ->
+            val scanStarted = service.startBluetoothScan()
+            if (!scanStarted) {
+                // Handle scan failure - maybe Bluetooth is off
+                _connectionState.value = _connectionState.value.copy(
+                    status = ConnectionStatus.ERROR,
+                    errorMessage = "Failed to start Bluetooth scan. Please check if Bluetooth is enabled."
                 )
+            }
+        } ?: run {
+            // ObdService not available
+            _connectionState.value = _connectionState.value.copy(
+                status = ConnectionStatus.ERROR,
+                errorMessage = "OBD service not available"
             )
-            _isScanning.value = false
         }
     }
 
     fun stopScan() {
-        _isScanning.value = false
+        obdService?.stopBluetoothScan()
     }
 
     fun connectToDevice(device: ObdDevice) {
@@ -211,10 +229,22 @@ class MainViewModel @Inject constructor(
             device = device
         )
         viewModelScope.launch {
-            kotlinx.coroutines.delay(2000)
-            _connectionState.value = _connectionState.value.copy(
-                status = ConnectionStatus.CONNECTED
-            )
+            val service = obdService
+            if (service != null) {
+                val success = service.connectToDevice(device)
+                if (!success) {
+                    _connectionState.value = _connectionState.value.copy(
+                        status = ConnectionStatus.ERROR,
+                        errorMessage = "Failed to connect to OBD device."
+                    )
+                }
+                // On success, ObdService will update state via StateFlow
+            } else {
+                _connectionState.value = _connectionState.value.copy(
+                    status = ConnectionStatus.ERROR,
+                    errorMessage = "OBD service not available."
+                )
+            }
         }
     }
 
@@ -345,7 +375,7 @@ data class AppSettings(
     val vibrationEnabled: Boolean = true,
     val aiEnabled: Boolean = true,
     val aiModel: String = "deepseek/deepseek-r1",
-    val openRouterApiKey: String = "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",
+    val openRouterApiKey: String = "",
     val autoConnect: Boolean = true,
     val pollingInterval: Long = 1000L
 )

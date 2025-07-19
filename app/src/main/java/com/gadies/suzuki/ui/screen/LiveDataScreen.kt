@@ -24,9 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gadies.suzuki.data.model.PidCategory
 import com.gadies.suzuki.data.model.PidData
-import com.gadies.suzuki.ui.theme.GadiesYellow
-import com.gadies.suzuki.ui.theme.GadiesGreen
+import com.gadies.suzuki.ui.theme.GadiesColors
 import com.gadies.suzuki.ui.viewmodel.MainViewModel
+import com.gadies.suzuki.ui.components.GaugeView
+import com.gadies.suzuki.data.model.ConnectionStatus
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -36,9 +37,39 @@ fun LiveDataScreen(
     navController: NavController,
     viewModel: MainViewModel = hiltViewModel()
 ) {
+    val connectionState by viewModel.connectionState.collectAsState()
     val categorizedPids by viewModel.categorizedPids.collectAsState()
     val expandedCategories = remember { mutableStateMapOf<PidCategory, Boolean>() }
     val expandedSubCategories = remember { mutableStateMapOf<String, Boolean>() }
+    
+    if (connectionState.status != ConnectionStatus.CONNECTED) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.BluetoothDisabled,
+                    contentDescription = "Not Connected",
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = "Not connected to OBD device",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Button(
+                    onClick = { navController.navigate("connection") }
+                ) {
+                    Text("Connect to OBD")
+                }
+            }
+        }
+        return
+    }
     
     LazyColumn(
         modifier = Modifier
@@ -267,19 +298,14 @@ fun PidDataRow(
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
-                    Text(
-                        text = "PID: ${pidData.pid} | Mode: ${pidData.mode}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                     if (pidData.isSuzukiSpecific) {
                         Text(
                             text = "Suzuki Specific",
                             style = MaterialTheme.typography.labelSmall,
-                            color = GadiesYellow,
+                            color = GadiesColors.OrangePrimary,
                             modifier = Modifier
                                 .background(
-                                    GadiesYellow.copy(alpha = 0.1f),
+                                    GadiesColors.OrangePrimary.copy(alpha = 0.1f),
                                     RoundedCornerShape(4.dp)
                                 )
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
@@ -292,18 +318,30 @@ fun PidDataRow(
                 ) {
                     // Value display
                     if (pidData.hasData) {
-                        Text(
-                            text = "${pidData.currentValue} ${pidData.unit}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = when {
-                                pidData.threshold?.let { threshold ->
-                                    (threshold.max != null && pidData.currentValue > threshold.max) ||
-                                    (threshold.min != null && pidData.currentValue < threshold.min)
-                                } == true -> MaterialTheme.colorScheme.error
-                                else -> MaterialTheme.colorScheme.primary
-                            }
-                        )
+                        if (pidData.uiType == "gauge") {
+                            GaugeView(
+                                value = pidData.currentValue,
+                                minValue = pidData.threshold?.min ?: 0.0,
+                                maxValue = pidData.threshold?.max ?: 100.0,
+                                unit = pidData.unit,
+                                title = pidData.name,
+                                size = if (pidData.category == PidCategory.ENGINE) 200 else 160,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        } else {
+                            Text(
+                                text = "${pidData.currentValue} ${pidData.unit}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = when {
+                                    pidData.threshold?.let { threshold ->
+                                        (threshold.max != null && pidData.currentValue > threshold.max) ||
+                                        (threshold.min != null && pidData.currentValue < threshold.min)
+                                    } == true -> MaterialTheme.colorScheme.error
+                                    else -> MaterialTheme.colorScheme.primary
+                                }
+                            )
+                        }
                         pidData.lastUpdated?.let { timestamp ->
                             Text(
                                 text = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(timestamp)),

@@ -10,7 +10,8 @@ import android.os.IBinder
 import android.util.Log
 import com.gadies.suzuki.data.model.*
 import com.gadies.suzuki.data.repository.PidRepository
-import dagger.hilt.android.AndroidEntryPoint
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,6 @@ import java.io.OutputStream
 import java.util.*
 import javax.inject.Inject
 
-@AndroidEntryPoint
 class ObdService : Service() {
     
     companion object {
@@ -56,38 +56,135 @@ class ObdService : Service() {
     override fun onCreate() {
         super.onCreate()
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        
+        // Register broadcast receiver for Bluetooth discovery
+        val filter = android.content.IntentFilter().apply {
+            addAction(BluetoothDevice.ACTION_FOUND)
+            addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+        }
+        registerReceiver(bluetoothReceiver, filter)
+        
         Log.d(TAG, "ObdService created")
     }
     
     override fun onDestroy() {
         super.onDestroy()
+        
+        // Unregister broadcast receiver
+        try {
+            unregisterReceiver(bluetoothReceiver)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error unregistering receiver", e)
+        }
+        
+        // Stop any ongoing scan
+        stopBluetoothScan()
+        
         disconnect()
         serviceScope.cancel()
         Log.d(TAG, "ObdService destroyed")
     }
     
-    fun getAvailableDevices(): List<ObdDevice> {
-        val devices = mutableListOf<ObdDevice>()
-        
-        try {
-            bluetoothAdapter?.bondedDevices?.forEach { device ->
-                if (device.name?.contains("ELM327", true) == true ||
-                    device.name?.contains("OBD", true) == true) {
-                    devices.add(
-                        ObdDevice(
-                            name = device.name ?: "Unknown",
-                            address = device.address,
-                            type = ConnectionType.BLUETOOTH,
-                            isAvailable = true
-                        )
-                    )
+    // Discovered devices during scanning
+    private val _discoveredDevices = MutableStateFlow<List<ObdDevice>>(emptyList())
+    val discoveredDevices: StateFlow<List<ObdDevice>> = _discoveredDevices.asStateFlow()
+    
+    private val _isScanning = MutableStateFlow(false)
+    val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
+    
+    private val bluetoothReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
+    when (intent?.action) {
+        BluetoothDevice.ACTION_FOUND -> {
+            val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+            device?.let {
+                val obdDevice = ObdDevice(
+                    name = it.name ?: "Unknown Device",
+                    address = it.address,
+                    type = ConnectionType.BLUETOOTH,
+                    isAvailable = true
+                )
+
+                val currentDevices = _discoveredDevices.value.toMutableList()
+                if (!currentDevices.any { existing -> existing.address == obdDevice.address }) {
+                    currentDevices.add(obdDevice)
+                    _discoveredDevices.value = currentDevices
+                    Log.d(TAG, "Discovered device: ${obdDevice.name} - ${obdDevice.address}")
                 }
             }
-        } catch (e: SecurityException) {
-            Log.e(TAG, "Permission denied for Bluetooth access", e)
         }
-        
-        return devices
+        BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+            _isScanning.value = false
+            Log.d(TAG, "Bluetooth discovery finished")
+        }
+    }
+}
+    }
+    
+    fun startBluetoothScan(): Boolean {
+    if (_isScanning.value) {
+        Log.d(TAG, "Scan already in progress")
+        return false
+    }
+
+    // Permission check
+    val hasPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+        ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) == android.content.pm.PackageManager.PERMISSION_GRANTED &&
+        ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    } else {
+        ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    }
+    if (!hasPermission) {
+        Log.e(TAG, "Bluetooth scan/connect permission not granted. Cannot start scan.")
+        _isScanning.value = false
+        return false
+    }
+
+    try {
+        bluetoothAdapter?.let { adapter ->
+            if (!adapter.isEnabled) {
+                Log.e(TAG, "Bluetooth is not enabled")
+                return false
+            }
+
+            // Clear previous results
+            _discoveredDevices.value = emptyList()
+
+            // Cancel any ongoing discovery
+            if (adapter.isDiscovering) {
+                adapter.cancelDiscovery()
+            }
+
+            // Start discovery
+            val started = adapter.startDiscovery()
+            if (started) {
+                _isScanning.value = true
+                Log.d(TAG, "Bluetooth discovery started")
+            } else {
+                Log.e(TAG, "Failed to start Bluetooth discovery")
+            }
+            return started
+        }
+    } catch (e: SecurityException) {
+        _isScanning.value = false
+        Log.e(TAG, "Permission denied for Bluetooth scanning: ${e.message}", e)
+    }
+    return false
+}
+    
+    fun stopBluetoothScan() {
+        try {
+            bluetoothAdapter?.cancelDiscovery()
+            _isScanning.value = false
+            Log.d(TAG, "Bluetooth discovery stopped")
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Permission denied for stopping Bluetooth scan", e)
+        }
+    }
+    
+    fun getAvailableDevices(): List<ObdDevice> {
+        // Return discovered devices from actual scanning, not bonded devices
+        return _discoveredDevices.value
     }
     
     suspend fun connectToDevice(device: ObdDevice): Boolean {
@@ -125,13 +222,9 @@ class ObdService : Service() {
             inputStream = bluetoothSocket?.inputStream
             outputStream = bluetoothSocket?.outputStream
             
-            // Initialize ELM327
+            // Initialize ELM327 - status will be updated inside initializeElm327()
             if (initializeElm327()) {
-                _connectionState.value = _connectionState.value.copy(
-                    status = ConnectionStatus.CONNECTED,
-                    device = device,
-                    lastConnected = System.currentTimeMillis()
-                )
+                // Only start polling after successful OBD initialization
                 startPolling()
                 true
             } else {
@@ -153,24 +246,61 @@ class ObdService : Service() {
     
     private suspend fun initializeElm327(): Boolean {
         return try {
+            Log.d(TAG, "Starting ELM327 initialization...")
+            
             // Reset ELM327
-            sendCommand("ATZ")
+            val resetResponse = sendCommand("ATZ")
+            if (!resetResponse.isSuccess) {
+                Log.e(TAG, "ELM327 reset failed")
+                return false
+            }
             delay(2000)
             
             // Turn off echo
-            sendCommand("ATE0")
+            val echoResponse = sendCommand("ATE0")
+            if (!echoResponse.isSuccess) {
+                Log.e(TAG, "ELM327 echo off failed")
+                return false
+            }
+            
+            // Turn off line feeds
+            sendCommand("ATL0")
+            
+            // Turn off spaces
+            sendCommand("ATS0")
             
             // Set protocol to automatic
             sendCommand("ATSP0")
             
-            // Test communication
-            val response = sendCommand("0100")
-            isInitialized = response.isSuccess
+            // Test OBD communication with vehicle
+            val testResponse = sendCommand("0100")
+            if (!testResponse.isSuccess || testResponse.rawResponse.contains("NO DATA") || 
+                testResponse.rawResponse.contains("UNABLE TO CONNECT")) {
+                Log.e(TAG, "Vehicle OBD communication test failed: ${testResponse.rawResponse}")
+                isInitialized = false
+                return false
+            }
             
-            Log.d(TAG, "ELM327 initialized: $isInitialized")
-            isInitialized
+            // Verify we can get vehicle identification
+            val vinResponse = sendCommand("0902")
+            
+            isInitialized = true
+            Log.d(TAG, "ELM327 successfully initialized and connected to vehicle")
+            
+            // Update connection state to connected only after successful OBD communication
+            _connectionState.value = _connectionState.value.copy(
+                status = ConnectionStatus.CONNECTED,
+                lastConnected = System.currentTimeMillis()
+            )
+            
+            true
         } catch (e: Exception) {
             Log.e(TAG, "ELM327 initialization failed", e)
+            isInitialized = false
+            _connectionState.value = _connectionState.value.copy(
+                status = ConnectionStatus.ERROR,
+                errorMessage = "Failed to initialize OBD connection: ${e.message}"
+            )
             false
         }
     }

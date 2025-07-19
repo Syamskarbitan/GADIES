@@ -16,23 +16,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// GADIES Brand Colors
-val GadiesYellow = Color(0xFFFFD700) // Primary yellow
-val GadiesYellowVariant = Color(0xFFFFC107)
-val GadiesDarkYellow = Color(0xFFFF8F00)
-
-val GadiesGreen = Color(0xFF4CAF50) // Success/Normal
-val GadiesOrange = Color(0xFFFF9800) // Caution
-val GadiesRed = Color(0xFFF44336) // Danger
-
-val GadiesGray = Color(0xFF757575)
-val GadiesLightGray = Color(0xFFF5F5F5)
-val GadiesDarkGray = Color(0xFF424242)
-
 private val DarkColorScheme = darkColorScheme(
-    primary = GadiesYellow,
-    secondary = GadiesYellowVariant,
-    tertiary = GadiesDarkYellow,
+    primary = GadiesColors.OrangePrimary,
+    secondary = GadiesColors.OrangeLight,
+    tertiary = GadiesColors.OrangeDark,
     background = Color(0xFF121212),
     surface = Color(0xFF1E1E1E),
     onPrimary = Color.Black,
@@ -43,11 +30,11 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = GadiesYellow,
-    secondary = GadiesYellowVariant,
-    tertiary = GadiesDarkYellow,
+    primary = GadiesColors.OrangePrimary,
+    secondary = GadiesColors.OrangeLight,
+    tertiary = GadiesColors.OrangeDark,
     background = Color.White,
-    surface = GadiesLightGray,
+    surface = GadiesColors.LightGray,
     onPrimary = Color.Black,
     onSecondary = Color.Black,
     onTertiary = Color.Black,

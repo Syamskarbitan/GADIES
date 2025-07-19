@@ -28,7 +28,6 @@ import com.gadies.suzuki.ui.screen.*
 import com.gadies.suzuki.ui.theme.GADIESTheme
 import com.gadies.suzuki.ui.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -50,30 +49,36 @@ class MainActivity : ComponentActivity() {
     }
     
     private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.values.all { it }
-        if (allGranted) {
-            startServices()
-        }
+    ActivityResultContracts.RequestMultiplePermissions()
+) { permissions ->
+    val allGranted = permissions.values.all { it }
+    if (allGranted) {
+        startServices()
+    } else {
+        showPermissionError()
     }
+}
     
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        
-        requestPermissions()
-        
-        setContent {
-            GADIESTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    GadiesApp()
-                }
+    super.onCreate(savedInstanceState)
+
+    if (!hasBluetoothPermissions()) {
+        requestBluetoothPermissions()
+    } else {
+        startServices()
+    }
+
+    setContent {
+        GADIESTheme {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                GadiesApp()
             }
         }
     }
+}
     
     override fun onStart() {
         super.onStart()
@@ -88,35 +93,36 @@ class MainActivity : ComponentActivity() {
         }
     }
     
-    private fun requestPermissions() {
-        val permissions = mutableListOf<String>().apply {
-            add(Manifest.permission.BLUETOOTH)
-            add(Manifest.permission.BLUETOOTH_ADMIN)
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-            add(Manifest.permission.ACCESS_COARSE_LOCATION)
-            add(Manifest.permission.INTERNET)
-            add(Manifest.permission.ACCESS_NETWORK_STATE)
-            
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                add(Manifest.permission.BLUETOOTH_CONNECT)
-                add(Manifest.permission.BLUETOOTH_SCAN)
-            }
-            
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                add(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
-        
-        val permissionsToRequest = permissions.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
-        
-        if (permissionsToRequest.isNotEmpty()) {
-            permissionLauncher.launch(permissionsToRequest.toTypedArray())
-        } else {
-            startServices()
-        }
+    private fun hasBluetoothPermissions(): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED &&
+        ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+    } else {
+        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
+}
+
+private fun requestBluetoothPermissions() {
+    val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        arrayOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT
+        )
+    } else {
+        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+    permissionLauncher.launch(permissions)
+}
+
+private fun showPermissionError() {
+    runOnUiThread {
+        android.widget.Toast.makeText(
+            this,
+            "Bluetooth permissions are required to scan for devices.",
+            android.widget.Toast.LENGTH_LONG
+        ).show()
+    }
+}
     
     private fun startServices() {
         // Start OBD Service
