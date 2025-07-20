@@ -54,3 +54,15 @@
 # Keep Bluetooth classes
 -keep class android.bluetooth.** { *; }
 -dontwarn android.bluetooth.**
+
+# Specific Jetpack Compose Rules for Performance
+-keep class androidx.compose.runtime.snapshots.** { *; }
+-dontwarn androidx.compose.runtime.snapshots.**
+-keep class androidx.compose.runtime.State { *; }
+-keep class androidx.compose.runtime.MutableState { *; }
+-keep class androidx.compose.runtime.snapshots.SnapshotStateList { *; }
+-keep class androidx.compose.runtime.snapshots.SnapshotStateMap { *; }
+-keepclassmembers class androidx.compose.runtime.snapshots.** {
+    public *;
+    protected *;
+}

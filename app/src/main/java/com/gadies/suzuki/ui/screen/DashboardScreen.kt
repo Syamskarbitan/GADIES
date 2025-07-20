@@ -83,7 +83,7 @@ fun DashboardScreen(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = GadiesYellow
+                containerColor = GadiesColors.OrangePrimary
             )
         )
         
@@ -160,10 +160,10 @@ fun ConnectionStatusIndicator(
     onClick: () -> Unit
 ) {
     val (color, icon, text) = when (status) {
-        ConnectionStatus.CONNECTED -> Triple(GadiesGreen, Icons.Default.Bluetooth, "Online")
-        ConnectionStatus.CONNECTING -> Triple(GadiesOrange, Icons.Default.BluetoothSearching, "Connecting")
-        ConnectionStatus.DISCONNECTED -> Triple(GadiesGray, Icons.Default.BluetoothDisabled, "Offline")
-        ConnectionStatus.ERROR -> Triple(GadiesRed, Icons.Default.Error, "Error")
+        ConnectionStatus.CONNECTED -> Triple(GadiesColors.Green, Icons.Default.Bluetooth, "Online")
+        ConnectionStatus.CONNECTING -> Triple(GadiesColors.Orange, Icons.Default.BluetoothSearching, "Connecting")
+        ConnectionStatus.DISCONNECTED -> Triple(GadiesColors.Gray, Icons.Default.BluetoothDisabled, "Offline")
+        ConnectionStatus.ERROR -> Triple(GadiesColors.Red, Icons.Default.Error, "Error")
     }
     
     TextButton(onClick = onClick) {
@@ -186,7 +186,7 @@ fun ConnectionStatusIndicator(
 fun OfflineBanner() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = GadiesOrange.copy(alpha = 0.1f)),
+        colors = CardDefaults.cardColors(containerColor = GadiesColors.Orange.copy(alpha = 0.1f)),
         shape = RoundedCornerShape(8.dp)
     ) {
         Row(
@@ -198,19 +198,19 @@ fun OfflineBanner() {
             Icon(
                 imageVector = Icons.Default.Warning,
                 contentDescription = "Warning",
-                tint = GadiesOrange
+                tint = GadiesColors.Orange
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Text(
                     text = "Offline Mode",
                     style = MaterialTheme.typography.titleSmall,
-                    color = GadiesOrange
+                    color = GadiesColors.Orange
                 )
                 Text(
                     text = "AI features disabled. Connect to OBD2 for real-time data.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = GadiesOrange
+                    color = GadiesColors.Orange
                 )
             }
         }
@@ -224,9 +224,9 @@ fun AlertBanner(
     onViewAlerts: () -> Unit
 ) {
     val alertColor = when (latestAlert.level) {
-        AlertLevel.DANGER -> GadiesRed
-        AlertLevel.CAUTION -> GadiesOrange
-        AlertLevel.NORMAL -> GadiesGreen
+        AlertLevel.DANGER -> GadiesColors.Red
+        AlertLevel.CAUTION -> GadiesColors.Orange
+        AlertLevel.NORMAL -> GadiesColors.Green
     }
     
     Card(
@@ -281,10 +281,10 @@ fun GaugeCard(
     val unit = pidData?.unit ?: ""
     
     val status = when {
-        currentValue in normalRange -> "Normal" to GadiesGreen
-        currentValue in cautionRange -> "Caution" to GadiesOrange
-        currentValue in dangerRange -> if (title.contains("Temperature")) "Overheat" to GadiesRed else "Low Battery" to GadiesRed
-        else -> "Unknown" to GadiesGray
+        currentValue in normalRange -> "Normal" to GadiesColors.Green
+        currentValue in cautionRange -> "Caution" to GadiesColors.Orange
+        currentValue in dangerRange -> if (title.contains("Temperature")) "Overheat" to GadiesColors.Red else "Low Battery" to GadiesColors.Red
+        else -> "Unknown" to GadiesColors.Gray
     }
     
     Card(
@@ -385,9 +385,9 @@ fun CircularGauge(
         val sweepAngle = (normalizedValue * 270).toFloat()
         
         val arcColor = when {
-            value in normalRange -> GadiesGreen
-            value in cautionRange -> GadiesOrange
-            value in dangerRange -> GadiesRed
+            value in normalRange -> GadiesColors.Green
+            value in cautionRange -> GadiesColors.Orange
+            value in dangerRange -> GadiesColors.Red
             else -> Color.Gray
         }
         
@@ -480,7 +480,7 @@ fun QuickActionButton(
     Card(
         modifier = modifier,
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = GadiesYellow.copy(alpha = 0.1f)),
+        colors = CardDefaults.cardColors(containerColor = GadiesColors.OrangePrimary.copy(alpha = 0.1f)),
         shape = RoundedCornerShape(8.dp)
     ) {
         Column(
@@ -493,7 +493,7 @@ fun QuickActionButton(
                 imageVector = icon,
                 contentDescription = title,
                 modifier = Modifier.size(32.dp),
-                tint = GadiesDarkYellow
+                tint = GadiesColors.OrangeDark
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -582,7 +582,7 @@ fun DataRow(
 fun AuthorSection() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = GadiesYellow.copy(alpha = 0.1f)),
+        colors = CardDefaults.cardColors(containerColor = GadiesColors.OrangePrimary.copy(alpha = 0.1f)),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(
@@ -607,7 +607,7 @@ fun AuthorSection() {
                     fontWeight = FontWeight.Medium
                 ),
                 textAlign = TextAlign.Center,
-                color = GadiesDarkYellow
+                color = GadiesColors.OrangeDark
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(

@@ -71,7 +71,7 @@ fun ConnectionScreen(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = GadiesYellow
+                containerColor = GadiesColors.OrangePrimary
             )
         )
         
@@ -88,7 +88,7 @@ fun ConnectionScreen(
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = GadiesYellow
+                contentColor = GadiesColors.OrangePrimary
             ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
@@ -102,6 +102,7 @@ fun ConnectionScreen(
             // Tab Content
             when (selectedTab) {
                 0 -> BluetoothTab(
+                    onDirectConnect = { viewModel.connectDirectly() },
                     availableDevices = availableDevices,
                     isScanning = isScanning,
                     connectionState = connectionState,
@@ -129,10 +130,10 @@ fun ConnectionStatusSection(
             .padding(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = when (connectionState.status) {
-                ConnectionStatus.CONNECTED -> GadiesGreen.copy(alpha = 0.1f)
-                ConnectionStatus.CONNECTING -> GadiesOrange.copy(alpha = 0.1f)
-                ConnectionStatus.DISCONNECTED -> GadiesRed.copy(alpha = 0.1f)
-                ConnectionStatus.ERROR -> GadiesRed.copy(alpha = 0.1f)
+                ConnectionStatus.CONNECTED -> GadiesColors.Green.copy(alpha = 0.1f)
+                ConnectionStatus.CONNECTING -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
+                ConnectionStatus.DISCONNECTED -> GadiesColors.Red.copy(alpha = 0.1f)
+                ConnectionStatus.ERROR -> GadiesColors.Red.copy(alpha = 0.1f)
             }
         ),
         shape = RoundedCornerShape(12.dp)
@@ -151,10 +152,10 @@ fun ConnectionStatusSection(
                         .clip(CircleShape)
                         .background(
                             when (connectionState.status) {
-                                ConnectionStatus.CONNECTED -> GadiesGreen
-                                ConnectionStatus.CONNECTING -> GadiesOrange
-                                ConnectionStatus.DISCONNECTED -> GadiesGray
-                                ConnectionStatus.ERROR -> GadiesRed
+                                ConnectionStatus.CONNECTED -> GadiesColors.Green
+                                ConnectionStatus.CONNECTING -> MaterialTheme.colorScheme.surfaceVariant
+                                ConnectionStatus.DISCONNECTED -> GadiesColors.Gray
+                                ConnectionStatus.ERROR -> GadiesColors.Red
                             }
                         ),
                     contentAlignment = Alignment.Center
@@ -187,10 +188,10 @@ fun ConnectionStatusSection(
                             fontWeight = FontWeight.Bold
                         ),
                         color = when (connectionState.status) {
-                            ConnectionStatus.CONNECTED -> GadiesGreen
-                            ConnectionStatus.CONNECTING -> GadiesOrange
-                            ConnectionStatus.DISCONNECTED -> GadiesGray
-                            ConnectionStatus.ERROR -> GadiesRed
+                            ConnectionStatus.CONNECTED -> GadiesColors.Green
+                            ConnectionStatus.CONNECTING -> MaterialTheme.colorScheme.surfaceVariant
+                            ConnectionStatus.DISCONNECTED -> GadiesColors.Gray
+                            ConnectionStatus.ERROR -> GadiesColors.Red
                         }
                     )
                     
@@ -210,7 +211,7 @@ fun ConnectionStatusSection(
                         Text(
                             text = error,
                             style = MaterialTheme.typography.bodySmall,
-                            color = GadiesRed
+                            color = GadiesColors.Red
                         )
                     }
                 }
@@ -221,7 +222,7 @@ fun ConnectionStatusSection(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Disconnect",
-                            tint = GadiesRed
+                            tint = GadiesColors.Red
                         )
                     }
                 }
@@ -237,13 +238,25 @@ fun BluetoothTab(
     connectionState: ConnectionState,
     onScanDevices: () -> Unit,
     onConnectDevice: (ObdDevice) -> Unit,
-    onStopScan: () -> Unit
+    onStopScan: () -> Unit,
+    onDirectConnect: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        Button(
+            onClick = onDirectConnect,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = GadiesColors.Green)
+        ) {
+            Icon(Icons.Default.Link, contentDescription = "Direct Connect", modifier = Modifier.padding(end = 8.dp))
+            Text("Sambung Langsung ke GADIES OBD")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // Scan Controls
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -265,7 +278,7 @@ fun BluetoothTab(
                 Button(
                     onClick = onScanDevices,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = GadiesYellow,
+                        containerColor = GadiesColors.OrangePrimary,
                         contentColor = Color.Black
                     ),
                     shape = RoundedCornerShape(8.dp)
@@ -366,7 +379,7 @@ fun WiFiTab(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = ipAddress.isNotBlank() && connectionState.status != ConnectionStatus.CONNECTING,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = GadiesYellow,
+                        containerColor = GadiesColors.OrangePrimary,
                         contentColor = Color.Black
                     ),
                     shape = RoundedCornerShape(8.dp)
@@ -434,7 +447,7 @@ fun DeviceItem(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isConnected) GadiesGreen.copy(alpha = 0.1f) 
+            containerColor = if (isConnected) GadiesColors.Green.copy(alpha = 0.1f) 
                            else MaterialTheme.colorScheme.surface
         )
     ) {
@@ -452,7 +465,7 @@ fun DeviceItem(
                     ConnectionType.NONE -> Icons.Default.Close
                 },
                 contentDescription = "Device Type",
-                tint = if (isConnected) GadiesGreen else GadiesYellow,
+                tint = if (isConnected) GadiesColors.Green else GadiesColors.OrangePrimary,
                 modifier = Modifier.size(32.dp)
             )
             
@@ -486,13 +499,13 @@ fun DeviceItem(
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = "Connected",
-                        tint = GadiesGreen
+                        tint = GadiesColors.Green
                     )
                 }
                 isConnecting -> {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = GadiesYellow
+                        color = GadiesColors.OrangePrimary
                     )
                 }
                 else -> {
@@ -512,7 +525,7 @@ fun ScanningIndicator() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CircularProgressIndicator(
-            color = GadiesYellow,
+            color = GadiesColors.OrangePrimary,
             modifier = Modifier.size(48.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -552,7 +565,7 @@ fun EmptyDeviceList(onScan: () -> Unit) {
         Button(
             onClick = onScan,
             colors = ButtonDefaults.buttonColors(
-                containerColor = GadiesYellow,
+                containerColor = GadiesColors.OrangePrimary,
                 contentColor = Color.Black
             )
         ) {

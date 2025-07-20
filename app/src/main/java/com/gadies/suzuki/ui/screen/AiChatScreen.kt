@@ -89,7 +89,7 @@ fun AiChatScreen(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = GadiesYellow
+                containerColor = GadiesColors.OrangePrimary
             )
         )
         
@@ -143,7 +143,7 @@ fun WelcomeMessage() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = GadiesYellow.copy(alpha = 0.1f)
+            containerColor = GadiesColors.OrangePrimary.copy(alpha = 0.1f)
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -154,7 +154,7 @@ fun WelcomeMessage() {
             Icon(
                 imageVector = Icons.Default.SmartToy,
                 contentDescription = "AI Mechanic",
-                tint = GadiesYellow,
+                tint = GadiesColors.OrangePrimary,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -209,7 +209,7 @@ fun ChatMessageBubble(message: ChatMessage) {
                 modifier = Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(GadiesYellow),
+                    .background(GadiesColors.OrangePrimary),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -228,7 +228,7 @@ fun ChatMessageBubble(message: ChatMessage) {
         ) {
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = if (isUser) GadiesYellow else MaterialTheme.colorScheme.surface
+                    containerColor = if (isUser) GadiesColors.OrangePrimary else MaterialTheme.colorScheme.surface
                 ),
                 shape = RoundedCornerShape(
                     topStart = 16.dp,
@@ -289,7 +289,7 @@ fun TypingIndicator() {
             modifier = Modifier
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(GadiesYellow),
+                .background(GadiesColors.OrangePrimary),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -356,13 +356,13 @@ fun MessageInputBar(
                 Icon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = "Warning",
-                    tint = GadiesOrange
+                    tint = MaterialTheme.colorScheme.error
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "AI Chat is disabled. Enable in Settings.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = GadiesOrange
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         } else {
@@ -391,7 +391,7 @@ fun MessageInputBar(
                 FloatingActionButton(
                     onClick = onSendMessage,
                     modifier = Modifier.size(48.dp),
-                    containerColor = GadiesYellow,
+                    containerColor = GadiesColors.OrangePrimary,
                     contentColor = Color.Black,
                     elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp)
                 ) {

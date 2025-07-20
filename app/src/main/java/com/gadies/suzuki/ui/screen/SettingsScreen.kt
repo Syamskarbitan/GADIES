@@ -50,7 +50,7 @@ fun SettingsScreen(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = GadiesYellow
+                containerColor = GadiesColors.OrangePrimary
             )
         )
         
@@ -89,8 +89,8 @@ fun SettingsScreen(
                             checked = settings.autoConnect,
                             onCheckedChange = { viewModel.updateAutoConnect(it) },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = GadiesYellow,
-                                checkedTrackColor = GadiesYellow.copy(alpha = 0.5f)
+                                checkedThumbColor = GadiesColors.OrangePrimary,
+                                checkedTrackColor = GadiesColors.OrangePrimary.copy(alpha = 0.5f)
                             )
                         )
                     }
@@ -115,8 +115,8 @@ fun SettingsScreen(
                             checked = settings.notificationsEnabled,
                             onCheckedChange = { viewModel.updateNotifications(it) },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = GadiesYellow,
-                                checkedTrackColor = GadiesYellow.copy(alpha = 0.5f)
+                                checkedThumbColor = GadiesColors.OrangePrimary,
+                                checkedTrackColor = GadiesColors.OrangePrimary.copy(alpha = 0.5f)
                             )
                         )
                     }
@@ -131,8 +131,8 @@ fun SettingsScreen(
                             checked = settings.vibrationEnabled,
                             onCheckedChange = { viewModel.updateVibration(it) },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = GadiesYellow,
-                                checkedTrackColor = GadiesYellow.copy(alpha = 0.5f)
+                                checkedThumbColor = GadiesColors.OrangePrimary,
+                                checkedTrackColor = GadiesColors.OrangePrimary.copy(alpha = 0.5f)
                             )
                         )
                     }
@@ -150,8 +150,8 @@ fun SettingsScreen(
                             checked = settings.aiEnabled,
                             onCheckedChange = { viewModel.updateAiEnabled(it) },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = GadiesYellow,
-                                checkedTrackColor = GadiesYellow.copy(alpha = 0.5f)
+                                checkedThumbColor = GadiesColors.OrangePrimary,
+                                checkedTrackColor = GadiesColors.OrangePrimary.copy(alpha = 0.5f)
                             )
                         )
                     }
@@ -273,7 +273,7 @@ fun SettingsSection(
             text = title,
             style = MaterialTheme.typography.titleSmall.copy(
                 fontWeight = FontWeight.Bold,
-                color = GadiesYellow
+                color = GadiesColors.OrangePrimary
             ),
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
         )
@@ -312,7 +312,7 @@ fun SettingsItem(
             Icon(
                 imageVector = icon,
                 contentDescription = title,
-                tint = GadiesYellow,
+                tint = GadiesColors.OrangePrimary,
                 modifier = Modifier.size(24.dp)
             )
             
@@ -328,7 +328,7 @@ fun SettingsItem(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -338,7 +338,7 @@ fun SettingsItem(
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = "Navigate",
-                    tint = Color.Gray
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -372,7 +372,7 @@ fun LanguageSelectionDialog(
                             selected = currentLanguage == code,
                             onClick = { onLanguageSelected(code) },
                             colors = RadioButtonDefaults.colors(
-                                selectedColor = GadiesYellow
+                                selectedColor = GadiesColors.OrangePrimary
                             )
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -418,7 +418,7 @@ fun ModelSelectionDialog(
                             selected = currentModel == model,
                             onClick = { onModelSelected(model) },
                             colors = RadioButtonDefaults.colors(
-                                selectedColor = GadiesYellow
+                                selectedColor = GadiesColors.OrangePrimary
                             )
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -463,7 +463,7 @@ fun ThemeSelectionDialog(
                             selected = currentTheme == code,
                             onClick = { onThemeSelected(code) },
                             colors = RadioButtonDefaults.colors(
-                                selectedColor = GadiesYellow
+                                selectedColor = GadiesColors.OrangePrimary
                             )
                         )
                         Spacer(modifier = Modifier.width(8.dp))

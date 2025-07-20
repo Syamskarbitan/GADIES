@@ -4,9 +4,9 @@ import androidx.compose.ui.graphics.Color
 
 object GadiesColors {
     // Primary Colors
-    val OrangePrimary = Color(0xFFFF5722)
-    val OrangeLight = Color(0xFFFF8A65)
-    val OrangeDark = Color(0xFFE64A19)
+    val OrangePrimary = Color(0xFFFFD700) // Gold
+    val OrangeLight = Color(0xFFFFECB3) // Light Gold
+    val OrangeDark = Color(0xFFFFA000)  // Dark Gold
 
     // Status Colors
     val Green = Color(0xFF4CAF50) // Success/Normal

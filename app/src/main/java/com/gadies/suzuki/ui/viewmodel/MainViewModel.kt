@@ -18,8 +18,8 @@ class MainViewModel @Inject constructor(
     private val aiService: AiService
 ) : ViewModel() {
 
-    // PID Data Simulator for testing
-    private val pidDataSimulator = PidDataSimulator(viewModelScope)
+    // PID Data Simulator for testing (DISABLED)
+    // private val pidDataSimulator = PidDataSimulator(viewModelScope)
 
     // PID Data
     val pidDataMap: StateFlow<Map<String, PidData>> = pidRepository.pidDataMap
@@ -226,50 +226,38 @@ class MainViewModel @Inject constructor(
     }
 
     fun connectToDevice(device: ObdDevice) {
+        // Set state to connecting immediately for responsive UI
         _connectionState.value = _connectionState.value.copy(
             status = ConnectionStatus.CONNECTING,
-            device = device
+            device = device,
+            errorMessage = null // Clear previous errors
         )
+        // Delegate the actual connection logic to the service in a coroutine
         viewModelScope.launch {
-            val service = obdService
-            if (service != null) {
-                val success = service.connectToDevice(device)
-                if (!success) {
-                    _connectionState.value = _connectionState.value.copy(
-                        status = ConnectionStatus.ERROR,
-                        errorMessage = "Failed to connect to OBD device."
-                    )
-                }
-                // On success, ObdService will update state via StateFlow
-            } else {
-                _connectionState.value = _connectionState.value.copy(
-                    status = ConnectionStatus.ERROR,
-                    errorMessage = "OBD service not available."
-                )
-            }
+            obdService?.connectToDevice(device)
         }
     }
 
     fun connectToWiFi(ip: String, port: Int) {
-        val wifiDevice = ObdDevice(
-            name = "ELM327 WiFi",
-            address = "$ip:$port",
-            type = ConnectionType.WIFI
-        )
+        val wifiDevice = ObdDevice(name = "WiFi OBD Reader", address = "$ip:$port", type = ConnectionType.WIFI)
+        // Set state to connecting immediately for responsive UI
         _connectionState.value = _connectionState.value.copy(
             status = ConnectionStatus.CONNECTING,
-            device = wifiDevice
+            device = wifiDevice,
+            errorMessage = null // Clear previous errors
         )
+        // Delegate the actual connection logic to the service in a coroutine
         viewModelScope.launch {
-            kotlinx.coroutines.delay(2000)
-            _connectionState.value = _connectionState.value.copy(
-                status = ConnectionStatus.CONNECTED
-            )
+            obdService?.connectToDevice(wifiDevice)
         }
     }
 
     fun disconnectObd() {
-        _connectionState.value = ConnectionState(status = ConnectionStatus.DISCONNECTED)
+        obdService?.disconnect()
+    }
+
+    fun connectDirectly() {
+        obdService?.connectDirectly("00:1D:A5:68:D0:34")
     }
 
     // Settings Management (DIUBAH: Menggunakan _settings yang benar)
@@ -338,14 +326,16 @@ class MainViewModel @Inject constructor(
         pidRepository.togglePidAlerts(pid, enabled)
     }
 
-    // PID Data Simulation Methods
+    // PID Data Simulation Methods (DISABLED)
+    /*
     fun startPidDataSimulation() {
-        pidDataSimulator.startSimulation()
+        // pidDataSimulator.startSimulation()
     }
 
     fun stopPidDataSimulation() {
-        pidDataSimulator.stopSimulation()
+        // pidDataSimulator.stopSimulation()
     }
+    */
 
     // DIHAPUS: Fungsi duplikat dan tidak perlu
     /*

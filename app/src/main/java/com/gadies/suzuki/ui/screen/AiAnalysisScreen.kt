@@ -51,7 +51,7 @@ fun AiAnalysisScreen(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = GadiesYellow
+                containerColor = GadiesColors.OrangePrimary
             )
         )
         
@@ -132,9 +132,9 @@ fun AiStatusCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = when {
-                !aiEnabled -> GadiesGray.copy(alpha = 0.1f)
-                !isConnected -> GadiesOrange.copy(alpha = 0.1f)
-                else -> GadiesGreen.copy(alpha = 0.1f)
+                !aiEnabled -> GadiesColors.Gray.copy(alpha = 0.1f)
+                !isConnected -> GadiesColors.Orange.copy(alpha = 0.1f)
+                else -> GadiesColors.Green.copy(alpha = 0.1f)
             }
         ),
         shape = RoundedCornerShape(12.dp)
@@ -153,9 +153,9 @@ fun AiStatusCard(
                 },
                 contentDescription = "AI Status",
                 tint = when {
-                    !aiEnabled -> GadiesGray
-                    !isConnected -> GadiesOrange
-                    else -> GadiesGreen
+                    !aiEnabled -> GadiesColors.Gray
+                    !isConnected -> GadiesColors.Orange
+                    else -> GadiesColors.Green
                 },
                 modifier = Modifier.size(32.dp)
             )
@@ -171,9 +171,9 @@ fun AiStatusCard(
                         fontWeight = FontWeight.Bold
                     ),
                     color = when {
-                        !aiEnabled -> GadiesGray
-                        !isConnected -> GadiesOrange
-                        else -> GadiesGreen
+                        !aiEnabled -> GadiesColors.Gray
+                        !isConnected -> GadiesColors.Orange
+                        else -> GadiesColors.Green
                     }
                 )
                 Text(
@@ -244,7 +244,7 @@ fun AnalysisFormCard(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading && odometerKm.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GadiesYellow,
+                    containerColor = GadiesColors.OrangePrimary,
                     contentColor = Color.Black
                 ),
                 shape = RoundedCornerShape(8.dp)
@@ -271,7 +271,7 @@ fun AnalysisFormCard(
                 Text(
                     text = "⚠️ Analysis will be limited without OBD2 connection",
                     style = MaterialTheme.typography.bodySmall,
-                    color = GadiesOrange,
+                    color = GadiesColors.Orange,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -322,14 +322,14 @@ fun AnalysisResultCard(
                         text = "Issues Found:",
                         style = MaterialTheme.typography.titleSmall.copy(
                             fontWeight = FontWeight.Bold,
-                            color = GadiesRed
+                            color = GadiesColors.Red
                         )
                     )
                     result.issuesFound.forEach { issue ->
                         Row(
                             modifier = Modifier.padding(vertical = 2.dp)
                         ) {
-                            Text("• ", color = GadiesRed)
+                            Text("• ", color = GadiesColors.Red)
                             Text(
                                 text = issue,
                                 style = MaterialTheme.typography.bodySmall
@@ -346,14 +346,14 @@ fun AnalysisResultCard(
                         text = "Recommendations:",
                         style = MaterialTheme.typography.titleSmall.copy(
                             fontWeight = FontWeight.Bold,
-                            color = GadiesGreen
+                            color = GadiesColors.Green
                         )
                     )
                     result.recommendations.forEach { recommendation ->
                         Row(
                             modifier = Modifier.padding(vertical = 2.dp)
                         ) {
-                            Text("• ", color = GadiesGreen)
+                            Text("• ", color = GadiesColors.Green)
                             Text(
                                 text = recommendation,
                                 style = MaterialTheme.typography.bodySmall
@@ -368,7 +368,7 @@ fun AnalysisResultCard(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = GadiesYellow.copy(alpha = 0.1f)
+                        containerColor = GadiesColors.OrangePrimary.copy(alpha = 0.1f)
                     )
                 ) {
                     Row(
@@ -378,7 +378,7 @@ fun AnalysisResultCard(
                         Icon(
                             imageVector = Icons.Default.Schedule,
                             contentDescription = "Next Service",
-                            tint = GadiesDarkYellow
+                            tint = GadiesColors.OrangeDark
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -396,7 +396,7 @@ fun AnalysisResultCard(
                 onClick = onStartChat,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GadiesYellow,
+                    containerColor = GadiesColors.OrangePrimary,
                     contentColor = Color.Black
                 ),
                 shape = RoundedCornerShape(8.dp)
@@ -416,9 +416,9 @@ fun AnalysisResultCard(
 @Composable
 fun HealthScoreIndicator(score: Int) {
     val color = when {
-        score >= 80 -> GadiesGreen
-        score >= 60 -> GadiesOrange
-        else -> GadiesRed
+        score >= 80 -> GadiesColors.Green
+        score >= 60 -> GadiesColors.Orange
+        else -> GadiesColors.Red
     }
     
     Card(
@@ -461,7 +461,7 @@ fun ErrorCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = GadiesRed.copy(alpha = 0.1f)
+            containerColor = GadiesColors.Red.copy(alpha = 0.1f)
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -472,7 +472,7 @@ fun ErrorCard(
             Icon(
                 imageVector = Icons.Default.Error,
                 contentDescription = "Error",
-                tint = GadiesRed,
+                tint = GadiesColors.Red,
                 modifier = Modifier.size(48.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -480,7 +480,7 @@ fun ErrorCard(
                 text = "Analysis Failed",
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    color = GadiesRed
+                    color = GadiesColors.Red
                 )
             )
             Text(
@@ -490,7 +490,7 @@ fun ErrorCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
             TextButton(onClick = onRetry) {
-                Text("Try Again", color = GadiesRed)
+                Text("Try Again", color = GadiesColors.Red)
             }
         }
     }
@@ -541,7 +541,7 @@ fun AnalysisLoadingDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 CircularProgressIndicator(
-                    color = GadiesYellow,
+                    color = GadiesColors.OrangePrimary,
                     modifier = Modifier.size(48.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))

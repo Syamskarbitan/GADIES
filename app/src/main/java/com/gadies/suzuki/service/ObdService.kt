@@ -9,6 +9,8 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.Manifest
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -19,7 +21,6 @@ import com.gadies.suzuki.R
 import com.gadies.suzuki.data.model.*
 import com.gadies.suzuki.data.repository.PidRepository
 import androidx.core.content.ContextCompat
-import android.content.pm.PackageManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,7 +47,10 @@ class ObdService : Service() {
     private val binder = ObdBinder()
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private var bluetoothAdapter: BluetoothAdapter? = null
+    private val bluetoothAdapter: BluetoothAdapter? by lazy {
+        val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
+        bluetoothManager.adapter
+    }
     private var bluetoothSocket: BluetoothSocket? = null
     private var inputStream: InputStream? = null
     private var outputStream: OutputStream? = null
@@ -63,10 +67,9 @@ class ObdService : Service() {
 
     override fun onBind(intent: Intent): IBinder = binder
 
-    override fun onCreate() {
+        override fun onCreate() {
         super.onCreate()
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-
+        
         // Create notification channel for foreground service
         createNotificationChannel()
         
@@ -109,23 +112,16 @@ class ObdService : Service() {
             Log.d(TAG, "BroadcastReceiver onReceive: ${intent?.action}")
             when (intent?.action) {
                 BluetoothDevice.ACTION_FOUND -> {
-                    val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                    Log.d(TAG, "ACTION_FOUND: Device found: ${device?.name} - ${device?.address}")
-                    device?.let {
-                        val obdDevice = ObdDevice(
-                            name = it.name ?: "Unknown Device",
-                            address = it.address,
-                            type = ConnectionType.BLUETOOTH,
-                            isAvailable = true
-                        )
-
-                        val currentDevices = _discoveredDevices.value.toMutableList()
-                        if (!currentDevices.any { existing -> existing.address == obdDevice.address }) {
-                            currentDevices.add(obdDevice)
-                            _discoveredDevices.value = currentDevices
-                            Log.d(TAG, "Discovered device added: ${obdDevice.name} - ${obdDevice.address}")
-                        }
+                    // Use modern getParcelableExtra with proper Android version handling
+                    val device: BluetoothDevice? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     }
+                    
+                    Log.d(TAG, "ACTION_FOUND: Device found: ${device?.name} - ${device?.address}")
+                    device?.let { handleDeviceFound(it) }
                 }
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
                     Log.d(TAG, "ACTION_DISCOVERY_FINISHED: Scan finished.")
@@ -136,69 +132,67 @@ class ObdService : Service() {
     }
 
     fun startBluetoothScan() {
-        Log.d(TAG, "Attempting to start Bluetooth scan.")
-
-        // Check permissions based on Android version
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            // Android 12+ requires BLUETOOTH_SCAN and ACCESS_FINE_LOCATION
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "BLUETOOTH_SCAN permission not granted.")
-                _connectionState.value = _connectionState.value.copy(status = ConnectionStatus.ERROR, errorMessage = "Izin BLUETOOTH_SCAN diperlukan untuk memindai perangkat.")
-                return
-            }
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "ACCESS_FINE_LOCATION permission not granted.")
-                _connectionState.value = _connectionState.value.copy(status = ConnectionStatus.ERROR, errorMessage = "Izin lokasi diperlukan untuk memindai perangkat Bluetooth.")
-                return
-            }
-        } else {
-            // Android 11 and below requires ACCESS_FINE_LOCATION and legacy Bluetooth permissions
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "ACCESS_FINE_LOCATION permission not granted.")
-                _connectionState.value = _connectionState.value.copy(status = ConnectionStatus.ERROR, errorMessage = "Izin lokasi diperlukan untuk memindai perangkat Bluetooth.")
-                return
-            }
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "BLUETOOTH_ADMIN permission not granted.")
-                _connectionState.value = _connectionState.value.copy(status = ConnectionStatus.ERROR, errorMessage = "Izin BLUETOOTH_ADMIN diperlukan untuk memindai perangkat.")
-                return
-            }
-        }
-
-        if (bluetoothAdapter == null) {
-            Log.e(TAG, "Bluetooth adapter is null.")
-            _connectionState.value = _connectionState.value.copy(status = ConnectionStatus.ERROR, errorMessage = "Bluetooth not supported.")
-            return
-        }
-
-        if (bluetoothAdapter?.isEnabled == false) {
-            Log.w(TAG, "Bluetooth is not enabled. Requesting user to enable it.")
+        Log.d(TAG, "Starting Bluetooth scan...")
+        
+        // Comprehensive permission check for all Android versions
+        if (!hasRequiredBluetoothPermissions()) {
+            Log.e(TAG, "Missing required Bluetooth permissions")
             _connectionState.value = _connectionState.value.copy(
                 status = ConnectionStatus.ERROR,
-                errorMessage = "Bluetooth tidak aktif. Mohon aktifkan Bluetooth.",
-                needsBluetoothEnable = true // Flag to notify UI
+                errorMessage = "Izin Bluetooth diperlukan untuk memindai perangkat."
             )
             return
         }
-
-        if (_isScanning.value) {
-            Log.d(TAG, "Scan already in progress.")
+        
+        // Check if Bluetooth is enabled
+        if (bluetoothAdapter?.isEnabled != true) {
+            Log.e(TAG, "Bluetooth is not enabled")
+            _connectionState.value = _connectionState.value.copy(
+                status = ConnectionStatus.ERROR,
+                errorMessage = "Bluetooth tidak aktif. Mohon aktifkan Bluetooth.",
+                needsBluetoothEnable = true
+            )
             return
         }
-
+        
+        // Check location services (required for BT scanning)
+        if (!isLocationEnabled()) {
+            Log.e(TAG, "Location services must be enabled for Bluetooth scanning")
+            _connectionState.value = _connectionState.value.copy(
+                status = ConnectionStatus.ERROR,
+                errorMessage = "Layanan Lokasi (GPS) harus diaktifkan untuk memindai perangkat."
+            )
+            return
+        }
+        
+        if (_isScanning.value) {
+            Log.d(TAG, "Scan already in progress")
+            return
+        }
+        
+        // Clear previous results
         _discoveredDevices.value = emptyList()
+        
+        // Load paired devices first
+        Log.d(TAG, "[SCAN_FLOW] Loading paired devices before starting discovery")
+        loadPairedDevices()
+        
+        // Start discovery
         _isScanning.value = true
-        Log.d(TAG, "Starting Bluetooth discovery...")
+        Log.d(TAG, "[SCAN_FLOW] Starting Bluetooth discovery. Adapter state: ${bluetoothAdapter?.state}")
+        
         val started = bluetoothAdapter?.startDiscovery()
         Log.d(TAG, "startDiscovery() returned: $started")
-
-        if (started == false) {
+        
+        if (started != true) {
             _isScanning.value = false
             _connectionState.value = _connectionState.value.copy(
                 status = ConnectionStatus.ERROR,
                 errorMessage = "Gagal memulai pemindaian. Coba lagi."
             )
-            Log.e(TAG, "startDiscovery() failed to start.")
+            Log.e(TAG, "Failed to start Bluetooth discovery")
+        } else {
+            Log.d(TAG, "Bluetooth discovery started successfully")
         }
     }
 
@@ -223,8 +217,152 @@ class ObdService : Service() {
         _isScanning.value = false
     }
 
+    private fun isLocationEnabled(): Boolean {
+        val locationManager = getSystemService(LOCATION_SERVICE) as android.location.LocationManager
+        return locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
+    }
+
     fun getAvailableDevices(): List<ObdDevice> {
         return _discoveredDevices.value
+    }
+
+    private fun hasRequiredBluetoothPermissions(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Android 12+
+            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        } else {
+            // Android 11 and below
+            ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+    
+    private fun handleDeviceFound(device: BluetoothDevice) {
+        try {
+            val deviceName = device.name ?: "Unknown Device"
+            val deviceAddress = device.address
+            
+            Log.d(TAG, "Processing discovered device: $deviceName ($deviceAddress)")
+            
+            val obdDevice = ObdDevice(
+                name = deviceName,
+                address = deviceAddress,
+                type = ConnectionType.BLUETOOTH,
+                isAvailable = true
+            )
+            
+            val currentDevices = _discoveredDevices.value.toMutableList()
+            if (!currentDevices.any { it.address == deviceAddress }) {
+                currentDevices.add(obdDevice)
+                _discoveredDevices.value = currentDevices
+                Log.d(TAG, "Device discovered and added: $deviceName ($deviceAddress)")
+            } else {
+                Log.d(TAG, "Device already in list: $deviceName ($deviceAddress)")
+            }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Security exception accessing device info: ${e.message}")
+        }
+    }
+    
+    private fun loadPairedDevices() {
+        Log.d(TAG, "[PAIRED_DEVICES] Loading paired Bluetooth devices...")
+        
+        if (bluetoothAdapter == null) {
+            Log.e(TAG, "Bluetooth adapter is null when loading paired devices.")
+            return
+        }
+
+        // Check permissions for getting bonded devices
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "BLUETOOTH_CONNECT permission required for paired devices")
+                return
+            }
+        }
+
+        try {
+            val bondedDevices = bluetoothAdapter?.bondedDevices ?: emptySet()
+            Log.d(TAG, "Found ${bondedDevices.size} paired devices")
+            
+            val pairedObdDevices = bondedDevices.mapNotNull { device ->
+                try {
+                    val deviceName = device.name ?: "Unknown Device"
+                    val deviceAddress = device.address
+                    
+                    Log.d(TAG, "Paired device: $deviceName - $deviceAddress")
+                    
+                    // Filter for likely OBD devices or show all for debugging
+                    if (isLikelyObdDevice(deviceName)) {
+                        ObdDevice(
+                            name = "$deviceName (Paired)",
+                            address = deviceAddress,
+                            type = ConnectionType.BLUETOOTH,
+                            rssi = null
+                        )
+                    } else {
+                        // For debugging, show all devices
+                        ObdDevice(
+                            name = "$deviceName (Paired)",
+                            address = deviceAddress,
+                            type = ConnectionType.BLUETOOTH,
+                            rssi = null
+                        )
+                    }
+                } catch (e: SecurityException) {
+                    Log.e(TAG, "Security exception accessing paired device: ${e.message}")
+                    null
+                }
+            }
+            
+            _discoveredDevices.value = pairedObdDevices
+            Log.d(TAG, "Loaded ${pairedObdDevices.size} paired devices")
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading paired devices: ${e.message}")
+        }
+    }
+    
+    private fun isLikelyObdDevice(deviceName: String): Boolean {
+        val obdKeywords = listOf("obd", "elm", "327", "scan", "diag", "car", "auto", "gadies")
+        return obdKeywords.any { keyword ->
+            deviceName.lowercase().contains(keyword)
+        }
+    }
+
+    fun connectDirectly(address: String) {
+        Log.d(TAG, "Attempting to connect directly to $address")
+
+        if (bluetoothAdapter == null || !bluetoothAdapter!!.isEnabled) {
+            Log.e(TAG, "Bluetooth not available or not enabled for direct connect.")
+            _connectionState.value = _connectionState.value.copy(
+                status = ConnectionStatus.ERROR,
+                errorMessage = "Bluetooth tidak aktif.",
+                needsBluetoothEnable = true
+            )
+            return
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                _connectionState.value = _connectionState.value.copy(status = ConnectionStatus.ERROR, errorMessage = "Izin BLUETOOTH_CONNECT diperlukan.")
+                Log.e(TAG, "BLUETOOTH_CONNECT permission not granted for direct connect.")
+                return
+            }
+        }
+
+        val deviceToConnect = ObdDevice(
+            name = "GADIES OBD (Direct)",
+            address = address,
+            type = ConnectionType.BLUETOOTH,
+            rssi = null
+        )
+
+        // Launch coroutine to call suspend function
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            connectToDevice(deviceToConnect)
+        }
     }
 
     suspend fun connectToDevice(device: ObdDevice): Boolean {
@@ -276,7 +414,7 @@ class ObdService : Service() {
         }
     }
 
-    private suspend fun connectWifi(device: ObdDevice): Boolean {
+    private suspend fun connectWifi(_device: ObdDevice): Boolean {
         return false // Placeholder for WiFi implementation
     }
 
