@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.gadies.suzuki.app-mergeDebugResources-67:/values-v18/values-v18.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\khaer\\.gradle\\caches\\transforms-3\\dd7336aed7bc0fb8ff5fcc0bcfdf3b0f\\transformed\\appcompat-1.6.1\\res\\values-v18\\values-v18.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "48",
+                        "endOffsets": "99"
+                    }
+                }
+            ]
+        }
+    ]
+}

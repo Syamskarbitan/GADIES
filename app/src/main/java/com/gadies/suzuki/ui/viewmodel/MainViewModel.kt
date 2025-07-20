@@ -6,6 +6,7 @@ import com.gadies.suzuki.data.model.*
 import com.gadies.suzuki.data.repository.PidRepository
 import com.gadies.suzuki.data.simulator.PidDataSimulator
 import com.gadies.suzuki.service.AiService
+import com.gadies.suzuki.service.ObdService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -44,6 +45,9 @@ class MainViewModel @Inject constructor(
     private val _isScanning = MutableStateFlow(false)
     val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
 
+    private val _requestBluetoothEnable = MutableStateFlow(false)
+    val requestBluetoothEnable: StateFlow<Boolean> = _requestBluetoothEnable.asStateFlow()
+
     // AI Analysis State
     private val _aiAnalysisState = MutableStateFlow<AiAnalysisState>(AiAnalysisState.Idle)
     val aiAnalysisState: StateFlow<AiAnalysisState> = _aiAnalysisState.asStateFlow()
@@ -77,6 +81,9 @@ class MainViewModel @Inject constructor(
 
     fun updateConnectionState(state: ConnectionState) {
         _connectionState.value = state
+        if (state.needsBluetoothEnable) {
+            _requestBluetoothEnable.value = true
+        }
     }
 
     fun toggleCategoryExpansion(category: PidCategory) {
@@ -172,9 +179,9 @@ class MainViewModel @Inject constructor(
     }
 
     // OBD Service reference for real Bluetooth operations
-    private var obdService: com.gadies.suzuki.service.ObdService? = null
+    private var obdService: ObdService? = null
     
-    fun setObdService(service: com.gadies.suzuki.service.ObdService) {
+    fun setObdService(service: ObdService) {
         obdService = service
         
         // Observe real scanning state
@@ -201,16 +208,11 @@ class MainViewModel @Inject constructor(
     
     // Connection Management - Real Bluetooth scanning
     fun scanForDevices() {
-        obdService?.let { service ->
-            val scanStarted = service.startBluetoothScan()
-            if (!scanStarted) {
-                // Handle scan failure - maybe Bluetooth is off
-                _connectionState.value = _connectionState.value.copy(
-                    status = ConnectionStatus.ERROR,
-                    errorMessage = "Failed to start Bluetooth scan. Please check if Bluetooth is enabled."
-                )
-            }
-        } ?: run {
+        val service = obdService
+        if (service != null) {
+            // startBluetoothScan() handles errors internally via connection state
+            service.startBluetoothScan()
+        } else {
             // ObdService not available
             _connectionState.value = _connectionState.value.copy(
                 status = ConnectionStatus.ERROR,
@@ -357,6 +359,15 @@ class MainViewModel @Inject constructor(
 
     fun resetAiAnalysis() {
         _aiAnalysisState.value = AiAnalysisState.Idle
+    }
+
+    fun onBluetoothEnableResult() {
+        _requestBluetoothEnable.value = false
+        // Optionally, reset the flag in the service's state as well
+        val current = _connectionState.value
+        if (current.needsBluetoothEnable) {
+            _connectionState.value = current.copy(needsBluetoothEnable = false)
+        }
     }
 }
 

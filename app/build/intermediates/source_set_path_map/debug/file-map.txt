@@ -1,0 +1,71 @@
+com.gadies.suzuki.app-jetified-ui-tooling-preview-release-0 C:\Users\khaer\.gradle\caches\transforms-3\021ca119ebffd1d1c77653d2ff7730e9\transformed\jetified-ui-tooling-preview-release\res
+com.gadies.suzuki.app-jetified-ui-graphics-release-1 C:\Users\khaer\.gradle\caches\transforms-3\02d1fd17a07da171ae71c0b3ef986f68\transformed\jetified-ui-graphics-release\res
+com.gadies.suzuki.app-jetified-material3-1.1.2-2 C:\Users\khaer\.gradle\caches\transforms-3\0b93b38b64f9ae2c80c7b0f671a0e3c5\transformed\jetified-material3-1.1.2\res
+com.gadies.suzuki.app-jetified-runtime-saveable-release-3 C:\Users\khaer\.gradle\caches\transforms-3\1153177a15e6d2445edf4ab3f07f758c\transformed\jetified-runtime-saveable-release\res
+com.gadies.suzuki.app-jetified-ui-unit-release-4 C:\Users\khaer\.gradle\caches\transforms-3\1316ebadee4de6a2543d47da6d929f1e\transformed\jetified-ui-unit-release\res
+com.gadies.suzuki.app-jetified-ui-geometry-release-5 C:\Users\khaer\.gradle\caches\transforms-3\1380078657ecef1e8467b30b3c1861a6\transformed\jetified-ui-geometry-release\res
+com.gadies.suzuki.app-jetified-material-icons-core-release-6 C:\Users\khaer\.gradle\caches\transforms-3\1a2d37cbbe5a7c9b5a21efc10439b218\transformed\jetified-material-icons-core-release\res
+com.gadies.suzuki.app-jetified-ui-tooling-data-release-7 C:\Users\khaer\.gradle\caches\transforms-3\1ac75c7140ea64009929b56aafdb592e\transformed\jetified-ui-tooling-data-release\res
+com.gadies.suzuki.app-drawerlayout-1.1.1-8 C:\Users\khaer\.gradle\caches\transforms-3\1bc149aa1788a54e57a6f7af33c14e83\transformed\drawerlayout-1.1.1\res
+com.gadies.suzuki.app-jetified-ui-tooling-release-9 C:\Users\khaer\.gradle\caches\transforms-3\200d4300b6605021f8425b0e48616572\transformed\jetified-ui-tooling-release\res
+com.gadies.suzuki.app-jetified-datastore-1.0.0-10 C:\Users\khaer\.gradle\caches\transforms-3\202a8ca5708c11f886103d4bfd73f72e\transformed\jetified-datastore-1.0.0\res
+com.gadies.suzuki.app-material-1.11.0-11 C:\Users\khaer\.gradle\caches\transforms-3\234a37910a675042530d133f16dde471\transformed\material-1.11.0\res
+com.gadies.suzuki.app-jetified-ui-text-release-12 C:\Users\khaer\.gradle\caches\transforms-3\259feacb21f2284f1702ec3f6914b335\transformed\jetified-ui-text-release\res
+com.gadies.suzuki.app-coordinatorlayout-1.1.0-13 C:\Users\khaer\.gradle\caches\transforms-3\2d28e0b8696708d505498b60bef4cd15\transformed\coordinatorlayout-1.1.0\res
+com.gadies.suzuki.app-jetified-viewpager2-1.0.0-14 C:\Users\khaer\.gradle\caches\transforms-3\34de223c6acf5fc96805bdf88a5ff742\transformed\jetified-viewpager2-1.0.0\res
+com.gadies.suzuki.app-jetified-bluetooth-1.0.0-alpha02-15 C:\Users\khaer\.gradle\caches\transforms-3\3579f063261738fb420d0f1f493cd4bb\transformed\jetified-bluetooth-1.0.0-alpha02\res
+com.gadies.suzuki.app-transition-1.2.0-16 C:\Users\khaer\.gradle\caches\transforms-3\37a570e4b32fe17cdfc582e4105dca46\transformed\transition-1.2.0\res
+com.gadies.suzuki.app-jetified-animation-release-17 C:\Users\khaer\.gradle\caches\transforms-3\3992ee77335a78a0e49510ddf49e55e5\transformed\jetified-animation-release\res
+com.gadies.suzuki.app-jetified-ui-util-release-18 C:\Users\khaer\.gradle\caches\transforms-3\3f0f9afa4686509c8600400ab17779fb\transformed\jetified-ui-util-release\res
+com.gadies.suzuki.app-jetified-savedstate-ktx-1.2.1-19 C:\Users\khaer\.gradle\caches\transforms-3\411c81d152fad935ac8a0f79e47d4964\transformed\jetified-savedstate-ktx-1.2.1\res
+com.gadies.suzuki.app-jetified-datastore-preferences-1.0.0-20 C:\Users\khaer\.gradle\caches\transforms-3\4140a150ed0524e79645af275674eb99\transformed\jetified-datastore-preferences-1.0.0\res
+com.gadies.suzuki.app-lifecycle-livedata-core-2.7.0-21 C:\Users\khaer\.gradle\caches\transforms-3\4375a9743d453e75b49600247f904bde\transformed\lifecycle-livedata-core-2.7.0\res
+com.gadies.suzuki.app-jetified-hilt-navigation-1.1.0-22 C:\Users\khaer\.gradle\caches\transforms-3\4670f95b3b5324f6501f77efee4aaef4\transformed\jetified-hilt-navigation-1.1.0\res
+com.gadies.suzuki.app-jetified-activity-compose-1.8.2-23 C:\Users\khaer\.gradle\caches\transforms-3\47145a6c43577e22e4606d2ff1b32870\transformed\jetified-activity-compose-1.8.2\res
+com.gadies.suzuki.app-jetified-appcompat-resources-1.6.1-24 C:\Users\khaer\.gradle\caches\transforms-3\489a4f319c77f0ed7d4ef8b023989bc4\transformed\jetified-appcompat-resources-1.6.1\res
+com.gadies.suzuki.app-jetified-activity-ktx-1.8.2-25 C:\Users\khaer\.gradle\caches\transforms-3\4e585d54e6bbb5c8c37737aee248b071\transformed\jetified-activity-ktx-1.8.2\res
+com.gadies.suzuki.app-jetified-navigation-compose-2.7.5-26 C:\Users\khaer\.gradle\caches\transforms-3\519a7ffdc9a5de70f5dbd8453a80f733\transformed\jetified-navigation-compose-2.7.5\res
+com.gadies.suzuki.app-navigation-common-2.7.5-27 C:\Users\khaer\.gradle\caches\transforms-3\575b0cfe16e02a83b91e175d274ac969\transformed\navigation-common-2.7.5\res
+com.gadies.suzuki.app-constraintlayout-2.0.1-28 C:\Users\khaer\.gradle\caches\transforms-3\581c9beb21003043eb707db25b0719c4\transformed\constraintlayout-2.0.1\res
+com.gadies.suzuki.app-navigation-common-ktx-2.7.5-29 C:\Users\khaer\.gradle\caches\transforms-3\5c65f12d5d46f8fe1bf5fcf8d26291d6\transformed\navigation-common-ktx-2.7.5\res
+com.gadies.suzuki.app-jetified-foundation-layout-release-30 C:\Users\khaer\.gradle\caches\transforms-3\601258a9b28ae1315b4a1a968de3d3e3\transformed\jetified-foundation-layout-release\res
+com.gadies.suzuki.app-jetified-foundation-release-31 C:\Users\khaer\.gradle\caches\transforms-3\67baaaa0ec974c16ebca377106ff9a74\transformed\jetified-foundation-release\res
+com.gadies.suzuki.app-lifecycle-viewmodel-2.7.0-32 C:\Users\khaer\.gradle\caches\transforms-3\6e21cb8d4b78fa8411c9b1410f9f60c9\transformed\lifecycle-viewmodel-2.7.0\res
+com.gadies.suzuki.app-jetified-core-ktx-1.12.0-33 C:\Users\khaer\.gradle\caches\transforms-3\6e45804987059365a5c31fb060d86214\transformed\jetified-core-ktx-1.12.0\res
+com.gadies.suzuki.app-navigation-runtime-ktx-2.7.5-34 C:\Users\khaer\.gradle\caches\transforms-3\75f4168769c03d077f34ca160eaaa234\transformed\navigation-runtime-ktx-2.7.5\res
+com.gadies.suzuki.app-jetified-profileinstaller-1.3.0-35 C:\Users\khaer\.gradle\caches\transforms-3\7e7d7715becaa5b9b8d1e2f146763696\transformed\jetified-profileinstaller-1.3.0\res
+com.gadies.suzuki.app-jetified-customview-poolingcontainer-1.0.0-36 C:\Users\khaer\.gradle\caches\transforms-3\823ac491533483e5a89ced84b2462216\transformed\jetified-customview-poolingcontainer-1.0.0\res
+com.gadies.suzuki.app-jetified-material-release-37 C:\Users\khaer\.gradle\caches\transforms-3\87860c11df329a0d2090af1fa16aeb6b\transformed\jetified-material-release\res
+com.gadies.suzuki.app-jetified-startup-runtime-1.1.1-38 C:\Users\khaer\.gradle\caches\transforms-3\8a6c1476e5aefa3141e4a761088a3fc7\transformed\jetified-startup-runtime-1.1.1\res
+com.gadies.suzuki.app-jetified-activity-1.8.2-39 C:\Users\khaer\.gradle\caches\transforms-3\8e8e75ed66ca9e1c0e1f38a6a7401ed1\transformed\jetified-activity-1.8.2\res
+com.gadies.suzuki.app-jetified-emoji2-1.4.0-40 C:\Users\khaer\.gradle\caches\transforms-3\90b0ebe932a3475f49a5cf660d9e76a2\transformed\jetified-emoji2-1.4.0\res
+com.gadies.suzuki.app-jetified-lifecycle-process-2.7.0-41 C:\Users\khaer\.gradle\caches\transforms-3\90c549044010fb2a0aa189701bd0fe62\transformed\jetified-lifecycle-process-2.7.0\res
+com.gadies.suzuki.app-jetified-lifecycle-viewmodel-ktx-2.7.0-42 C:\Users\khaer\.gradle\caches\transforms-3\96092cef178ff06c02029dd50eb47e4e\transformed\jetified-lifecycle-viewmodel-ktx-2.7.0\res
+com.gadies.suzuki.app-jetified-lifecycle-viewmodel-savedstate-2.7.0-43 C:\Users\khaer\.gradle\caches\transforms-3\9ae1008d510c61f65b033090669aaf0d\transformed\jetified-lifecycle-viewmodel-savedstate-2.7.0\res
+com.gadies.suzuki.app-jetified-savedstate-1.2.1-44 C:\Users\khaer\.gradle\caches\transforms-3\9caf736d3af43824e4c4e0045125378e\transformed\jetified-savedstate-1.2.1\res
+com.gadies.suzuki.app-core-1.12.0-45 C:\Users\khaer\.gradle\caches\transforms-3\a29242cc2f6bbf0e4652127f1385413d\transformed\core-1.12.0\res
+com.gadies.suzuki.app-lifecycle-runtime-2.7.0-46 C:\Users\khaer\.gradle\caches\transforms-3\a5b0a0ee6eb3582d9c7773741ddc1789\transformed\lifecycle-runtime-2.7.0\res
+com.gadies.suzuki.app-navigation-runtime-2.7.5-47 C:\Users\khaer\.gradle\caches\transforms-3\a7735e8f38afdfb063f0f28e0e496ca9\transformed\navigation-runtime-2.7.5\res
+com.gadies.suzuki.app-lifecycle-livedata-2.7.0-48 C:\Users\khaer\.gradle\caches\transforms-3\a872f01d6cbff9d0f9124c8a18b5e87d\transformed\lifecycle-livedata-2.7.0\res
+com.gadies.suzuki.app-jetified-lifecycle-viewmodel-compose-2.7.0-49 C:\Users\khaer\.gradle\caches\transforms-3\ace4b3dead1f77398aaa37b6443c27f2\transformed\jetified-lifecycle-viewmodel-compose-2.7.0\res
+com.gadies.suzuki.app-jetified-hilt-navigation-compose-1.1.0-50 C:\Users\khaer\.gradle\caches\transforms-3\b487c4c0f0859bc364115ea20d611eb2\transformed\jetified-hilt-navigation-compose-1.1.0\res
+com.gadies.suzuki.app-cardview-1.0.0-51 C:\Users\khaer\.gradle\caches\transforms-3\b7b73e96ec568841f86a3695ae519b60\transformed\cardview-1.0.0\res
+com.gadies.suzuki.app-jetified-lifecycle-runtime-ktx-2.7.0-52 C:\Users\khaer\.gradle\caches\transforms-3\c1e82040612aa5d03421456f81152fd5\transformed\jetified-lifecycle-runtime-ktx-2.7.0\res
+com.gadies.suzuki.app-jetified-animation-core-release-53 C:\Users\khaer\.gradle\caches\transforms-3\cb91e6874ad10deec37a6e975b930304\transformed\jetified-animation-core-release\res
+com.gadies.suzuki.app-fragment-1.5.1-54 C:\Users\khaer\.gradle\caches\transforms-3\ce1754363b25780bfdf210164933dee1\transformed\fragment-1.5.1\res
+com.gadies.suzuki.app-core-runtime-2.2.0-55 C:\Users\khaer\.gradle\caches\transforms-3\d28d6dd8881cba2a484efe94785b558e\transformed\core-runtime-2.2.0\res
+com.gadies.suzuki.app-jetified-ui-release-56 C:\Users\khaer\.gradle\caches\transforms-3\d3872560378a001c48796b23dfd675e3\transformed\jetified-ui-release\res
+com.gadies.suzuki.app-jetified-material-icons-extended-release-57 C:\Users\khaer\.gradle\caches\transforms-3\d7439589fef34a8a508aab4c1ba3ae70\transformed\jetified-material-icons-extended-release\res
+com.gadies.suzuki.app-appcompat-1.6.1-58 C:\Users\khaer\.gradle\caches\transforms-3\dd7336aed7bc0fb8ff5fcc0bcfdf3b0f\transformed\appcompat-1.6.1\res
+com.gadies.suzuki.app-jetified-lifecycle-livedata-core-ktx-2.7.0-59 C:\Users\khaer\.gradle\caches\transforms-3\e5ce8042150f23050ffd1a0c52e63263\transformed\jetified-lifecycle-livedata-core-ktx-2.7.0\res
+com.gadies.suzuki.app-jetified-runtime-release-60 C:\Users\khaer\.gradle\caches\transforms-3\e5e14ffa8a66cd6494177a344fa3edf3\transformed\jetified-runtime-release\res
+com.gadies.suzuki.app-recyclerview-1.1.0-61 C:\Users\khaer\.gradle\caches\transforms-3\e713b68386bad6b37bc64d55196b4c7f\transformed\recyclerview-1.1.0\res
+com.gadies.suzuki.app-jetified-annotation-experimental-1.3.0-62 C:\Users\khaer\.gradle\caches\transforms-3\f19e9bbc129c8850085d902808364079\transformed\jetified-annotation-experimental-1.3.0\res
+com.gadies.suzuki.app-jetified-emoji2-views-helper-1.4.0-63 C:\Users\khaer\.gradle\caches\transforms-3\f248a684c1235ce10b08eba9312dfcd9\transformed\jetified-emoji2-views-helper-1.4.0\res
+com.gadies.suzuki.app-jetified-material-ripple-release-64 C:\Users\khaer\.gradle\caches\transforms-3\faac699445e898c3921127e226b8aeb8\transformed\jetified-material-ripple-release\res
+com.gadies.suzuki.app-resValues-65 C:\Users\khaer\Downloads\New folder (2)\GADIES\app\build\generated\res\resValues\debug
+com.gadies.suzuki.app-packageDebugResources-66 C:\Users\khaer\Downloads\New folder (2)\GADIES\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.gadies.suzuki.app-packageDebugResources-67 C:\Users\khaer\Downloads\New folder (2)\GADIES\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.gadies.suzuki.app-merged_res-68 C:\Users\khaer\Downloads\New folder (2)\GADIES\app\build\intermediates\merged_res\debug
+com.gadies.suzuki.app-debug-69 C:\Users\khaer\Downloads\New folder (2)\GADIES\app\src\debug\res
+com.gadies.suzuki.app-main-70 C:\Users\khaer\Downloads\New folder (2)\GADIES\app\src\main\res

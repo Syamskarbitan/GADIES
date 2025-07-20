@@ -19,7 +19,8 @@ data class ConnectionState(
     val status: ConnectionStatus = ConnectionStatus.DISCONNECTED,
     val device: ObdDevice? = null,
     val errorMessage: String? = null,
-    val lastConnected: Long = 0L
+    val lastConnected: Long = 0L,
+    val needsBluetoothEnable: Boolean = false
 )
 
 data class ObdCommand(
