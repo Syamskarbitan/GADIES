@@ -182,11 +182,13 @@ class MainViewModel @Inject constructor(
     private var obdService: ObdService? = null
     
     fun setObdService(service: ObdService) {
+        Log.d("MainViewModel", "setObdService() called")
         obdService = service
         
         // Observe real scanning state
         viewModelScope.launch {
             service.isScanning.collect { isScanning ->
+                Log.d("MainViewModel", "isScanning collected: $isScanning")
                 _isScanning.value = isScanning
             }
         }
@@ -194,6 +196,7 @@ class MainViewModel @Inject constructor(
         // Observe discovered devices
         viewModelScope.launch {
             service.discoveredDevices.collect { devices ->
+                Log.d("MainViewModel", "discoveredDevices collected: ${devices.size} devices")
                 _availableDevices.value = devices
             }
         }
@@ -201,6 +204,7 @@ class MainViewModel @Inject constructor(
         // Observe connection state
         viewModelScope.launch {
             service.connectionState.collect { state ->
+                Log.d("MainViewModel", "connectionState collected: $state")
                 _connectionState.value = state
             }
         }

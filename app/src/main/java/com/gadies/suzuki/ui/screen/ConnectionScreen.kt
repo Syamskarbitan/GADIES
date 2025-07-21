@@ -207,9 +207,9 @@ fun ConnectionStatusSection(
                         )
                     }
                     
-                    connectionState.errorMessage?.let { error ->
+                    if (connectionState.errorMessage != null) {
                         Text(
-                            text = error,
+                            text = connectionState.errorMessage,
                             style = MaterialTheme.typography.bodySmall,
                             color = GadiesColors.Red
                         )

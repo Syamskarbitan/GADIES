@@ -50,7 +50,12 @@ class ObdService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy {
-        (applicationContext.getSystemService(BLUETOOTH_SERVICE) as? android.bluetooth.BluetoothManager)?.adapter
+        Log.d(TAG, "Initializing BluetoothAdapter")
+        val bluetoothManager = applicationContext.getSystemService(BLUETOOTH_SERVICE) as? android.bluetooth.BluetoothManager
+        if (bluetoothManager == null) {
+            Log.e(TAG, "BluetoothManager not found.")
+        }
+        bluetoothManager?.adapter
     }
     private var bluetoothSocket: BluetoothSocket? = null
     private var inputStream: InputStream? = null
@@ -68,8 +73,9 @@ class ObdService : Service() {
 
     override fun onBind(intent: Intent): IBinder = binder
 
-        override fun onCreate() {
+    override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "ObdService onCreate")
         
         // Create notification channel for foreground service
         createNotificationChannel()
@@ -89,6 +95,7 @@ class ObdService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d(TAG, "ObdService onDestroy")
 
         try {
             unregisterReceiver(bluetoothReceiver)
@@ -133,11 +140,11 @@ class ObdService : Service() {
     }
 
     fun startBluetoothScan() {
-        Log.d(TAG, "Starting Bluetooth scan...")
+        Log.d(TAG, "startBluetoothScan() called")
         
         // Comprehensive permission check for all Android versions
         if (!hasRequiredBluetoothPermissions()) {
-            Log.e(TAG, "Missing required Bluetooth permissions")
+            Log.e(TAG, "startBluetoothScan: Missing required Bluetooth permissions")
             _connectionState.value = _connectionState.value.copy(
                 status = ConnectionStatus.ERROR,
                 errorMessage = "Izin Bluetooth diperlukan untuk memindai perangkat."
@@ -147,7 +154,7 @@ class ObdService : Service() {
         
         // Check if Bluetooth is enabled
         if (bluetoothAdapter?.isEnabled != true) {
-            Log.e(TAG, "Bluetooth is not enabled")
+            Log.e(TAG, "startBluetoothScan: Bluetooth is not enabled")
             _connectionState.value = _connectionState.value.copy(
                 status = ConnectionStatus.ERROR,
                 errorMessage = "Bluetooth tidak aktif. Mohon aktifkan Bluetooth.",
@@ -158,7 +165,7 @@ class ObdService : Service() {
         
         // Check location services (required for BT scanning)
         if (!isLocationEnabled()) {
-            Log.e(TAG, "Location services must be enabled for Bluetooth scanning")
+            Log.e(TAG, "startBluetoothScan: Location services must be enabled for Bluetooth scanning")
             _connectionState.value = _connectionState.value.copy(
                 status = ConnectionStatus.ERROR,
                 errorMessage = "Layanan Lokasi (GPS) harus diaktifkan untuk memindai perangkat."
@@ -167,20 +174,20 @@ class ObdService : Service() {
         }
         
         if (_isScanning.value) {
-            Log.d(TAG, "Scan already in progress")
+            Log.d(TAG, "startBluetoothScan: Scan already in progress")
             return
         }
         
         // Load paired devices first
-        Log.d(TAG, "[SCAN_FLOW] Loading paired devices before starting discovery")
+        Log.d(TAG, "startBluetoothScan: Loading paired devices before starting discovery")
         loadPairedDevices()
         
         // Start discovery
         _isScanning.value = true
-        Log.d(TAG, "[SCAN_FLOW] Starting Bluetooth discovery. Adapter state: ${bluetoothAdapter?.state}")
+        Log.d(TAG, "startBluetoothScan: Starting Bluetooth discovery. Adapter state: ${bluetoothAdapter?.state}")
         
         val started = bluetoothAdapter?.startDiscovery()
-        Log.d(TAG, "startDiscovery() returned: $started")
+        Log.d(TAG, "startBluetoothScan: startDiscovery() returned: $started")
         
         if (started != true) {
             _isScanning.value = false
@@ -188,14 +195,14 @@ class ObdService : Service() {
                 status = ConnectionStatus.ERROR,
                 errorMessage = "Failed to start scan. Check permissions and adapter state."
             )
-            Log.e(TAG, "Failed to start Bluetooth discovery")
+            Log.e(TAG, "startBluetoothScan: Failed to start Bluetooth discovery")
         } else {
-            Log.d(TAG, "Bluetooth discovery started successfully")
+            Log.d(TAG, "startBluetoothScan: Bluetooth discovery started successfully")
         }
     }
 
     fun stopBluetoothScan() {
-        Log.d(TAG, "Attempting to stop Bluetooth scan.")
+        Log.d(TAG, "stopBluetoothScan() called")
         
         // Check permissions based on Android version
         val hasPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
@@ -206,11 +213,11 @@ class ObdService : Service() {
         
         if (hasPermission) {
             if (bluetoothAdapter?.isDiscovering == true) {
-                Log.d(TAG, "Stopping Bluetooth discovery...")
+                Log.d(TAG, "stopBluetoothScan: Stopping Bluetooth discovery...")
                 bluetoothAdapter?.cancelDiscovery()
             }
         } else {
-            Log.w(TAG, "No permission to stop Bluetooth scan")
+            Log.w(TAG, "stopBluetoothScan: No permission to stop Bluetooth scan")
         }
         _isScanning.value = false
     }
@@ -238,11 +245,12 @@ class ObdService : Service() {
     }
     
     private fun handleDeviceFound(device: BluetoothDevice) {
+        Log.d(TAG, "handleDeviceFound: Found device: ${device.name} (${device.address})")
         try {
             val deviceName = device.name ?: "Unknown Device"
             val deviceAddress = device.address
             
-            Log.d(TAG, "Processing discovered device: $deviceName ($deviceAddress)")
+            Log.d(TAG, "handleDeviceFound: Processing discovered device: $deviceName ($deviceAddress)")
             
             val obdDevice = ObdDevice(
                 name = deviceName,
@@ -255,41 +263,41 @@ class ObdService : Service() {
             if (!currentDevices.any { it.address == deviceAddress }) {
                 currentDevices.add(obdDevice)
                 _discoveredDevices.value = currentDevices
-                Log.d(TAG, "Device discovered and added: $deviceName ($deviceAddress)")
+                Log.d(TAG, "handleDeviceFound: Device discovered and added: $deviceName ($deviceAddress)")
             } else {
-                Log.d(TAG, "Device already in list: $deviceName ($deviceAddress)")
+                Log.d(TAG, "handleDeviceFound: Device already in list: $deviceName ($deviceAddress)")
             }
         } catch (e: SecurityException) {
-            Log.e(TAG, "Security exception accessing device info: ${e.message}")
+            Log.e(TAG, "handleDeviceFound: Security exception accessing device info: ${e.message}")
         }
     }
     
     private fun loadPairedDevices() {
-        Log.d(TAG, "[PAIRED_DEVICES] Loading paired Bluetooth devices...")
+        Log.d(TAG, "loadPairedDevices() called")
         
         if (bluetoothAdapter == null) {
-            Log.e(TAG, "Bluetooth adapter is null when loading paired devices.")
+            Log.e(TAG, "loadPairedDevices: Bluetooth adapter is null.")
             return
         }
 
         // Check permissions for getting bonded devices
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "BLUETOOTH_CONNECT permission required for paired devices")
+                Log.e(TAG, "loadPairedDevices: BLUETOOTH_CONNECT permission required for paired devices")
                 return
             }
         }
 
         try {
             val bondedDevices = bluetoothAdapter?.bondedDevices ?: emptySet()
-            Log.d(TAG, "Found ${bondedDevices.size} paired devices")
+            Log.d(TAG, "loadPairedDevices: Found ${bondedDevices.size} paired devices")
             
             val pairedObdDevices = bondedDevices.mapNotNull { device ->
                 try {
                     val deviceName = device.name ?: "Unknown Device"
                     val deviceAddress = device.address
                     
-                    Log.d(TAG, "Paired device: $deviceName - $deviceAddress")
+                    Log.d(TAG, "loadPairedDevices: Paired device: $deviceName - $deviceAddress")
                     
                     // Filter for likely OBD devices or show all for debugging
                     if (isLikelyObdDevice(deviceName)) {
@@ -309,7 +317,7 @@ class ObdService : Service() {
                         )
                     }
                 } catch (e: SecurityException) {
-                    Log.e(TAG, "Security exception accessing paired device: ${e.message}")
+                    Log.e(TAG, "loadPairedDevices: Security exception accessing paired device: ${e.message}")
                     null
                 }
             }
@@ -321,10 +329,10 @@ class ObdService : Service() {
                 }
             }
             _discoveredDevices.value = currentDevices
-            Log.d(TAG, "Loaded ${pairedObdDevices.size} paired devices, total devices: ${currentDevices.size}")
+            Log.d(TAG, "loadPairedDevices: Loaded ${pairedObdDevices.size} paired devices, total devices: ${currentDevices.size}")
             
         } catch (e: Exception) {
-            Log.e(TAG, "Error loading paired devices: ${e.message}")
+            Log.e(TAG, "loadPairedDevices: Error loading paired devices: ${e.message}")
         }
     }
     

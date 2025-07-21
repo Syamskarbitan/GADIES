@@ -55,12 +55,15 @@ class MainActivity : ComponentActivity() {
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            Log.d(TAG, "onServiceConnected: Service connected")
             val binder = service as ObdService.ObdBinder
             obdService = binder.getService()
+            viewModel.setObdService(obdService!!)
             isServiceBound = true
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
+            Log.d(TAG, "onServiceDisconnected: Service disconnected")
             obdService = null
             isServiceBound = false
         }
@@ -70,6 +73,9 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         Log.d(TAG, "Permission result received: $permissions")
+        permissions.entries.forEach {
+            Log.d(TAG, "Permission: ${it.key}, Granted: ${it.value}")
+        }
         val allGranted = permissions.values.all { it }
         if (allGranted) {
             Log.d(TAG, "All permissions granted.")
