@@ -30,7 +30,9 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.*
 import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ObdService : Service() {
 
     companion object {
@@ -48,8 +50,7 @@ class ObdService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy {
-        val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
-        bluetoothManager.adapter
+        (applicationContext.getSystemService(BLUETOOTH_SERVICE) as? android.bluetooth.BluetoothManager)?.adapter
     }
     private var bluetoothSocket: BluetoothSocket? = null
     private var inputStream: InputStream? = null
@@ -170,9 +171,6 @@ class ObdService : Service() {
             return
         }
         
-        // Clear previous results
-        _discoveredDevices.value = emptyList()
-        
         // Load paired devices first
         Log.d(TAG, "[SCAN_FLOW] Loading paired devices before starting discovery")
         loadPairedDevices()
@@ -188,7 +186,7 @@ class ObdService : Service() {
             _isScanning.value = false
             _connectionState.value = _connectionState.value.copy(
                 status = ConnectionStatus.ERROR,
-                errorMessage = "Gagal memulai pemindaian. Coba lagi."
+                errorMessage = "Failed to start scan. Check permissions and adapter state."
             )
             Log.e(TAG, "Failed to start Bluetooth discovery")
         } else {
@@ -316,8 +314,14 @@ class ObdService : Service() {
                 }
             }
             
-            _discoveredDevices.value = pairedObdDevices
-            Log.d(TAG, "Loaded ${pairedObdDevices.size} paired devices")
+            val currentDevices = _discoveredDevices.value.toMutableList()
+            pairedObdDevices.forEach { pairedDevice ->
+                if (currentDevices.none { it.address == pairedDevice.address }) {
+                    currentDevices.add(pairedDevice)
+                }
+            }
+            _discoveredDevices.value = currentDevices
+            Log.d(TAG, "Loaded ${pairedObdDevices.size} paired devices, total devices: ${currentDevices.size}")
             
         } catch (e: Exception) {
             Log.e(TAG, "Error loading paired devices: ${e.message}")
