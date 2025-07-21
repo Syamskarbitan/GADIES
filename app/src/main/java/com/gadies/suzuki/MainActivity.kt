@@ -185,6 +185,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GadiesApp(activity: MainActivity, mainViewModel: MainViewModel) {
     val navController = rememberNavController()
@@ -197,50 +198,83 @@ fun GadiesApp(activity: MainActivity, mainViewModel: MainViewModel) {
         }
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = "dashboard"
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(
+                items = listOf(
+                    BottomNavItem(
+                        name = "Dashboard",
+                        route = "dashboard",
+                        icon = Icons.Default.Dashboard
+                    ),
+                    BottomNavItem(
+                        name = "Live Data",
+                        route = "live_data",
+                        icon = Icons.Default.Sensors
+                    ),
+                    BottomNavItem(
+                        name = "AI Analysis",
+                        route = "ai_analysis",
+                        icon = Icons.Default.AutoAwesome
+                    ),
+                    BottomNavItem(
+                        name = "Settings",
+                        route = "settings",
+                        icon = Icons.Default.Settings
+                    )
+                ),
+                navController = navController,
+                onItemClick = {
+                    navController.navigate(it.route)
+                }
+            )
+        }
     ) {
-        composable("dashboard") {
-            DashboardScreen(
-                navController = navController,
-                viewModel = mainViewModel
-            )
-        }
+        NavHost(
+            navController = navController,
+            startDestination = "dashboard"
+        ) {
+            composable("dashboard") {
+                DashboardScreen(
+                    navController = navController,
+                    viewModel = mainViewModel
+                )
+            }
 
-        composable("live_data") {
-            LiveDataScreen(
-                navController = navController,
-                viewModel = mainViewModel
-            )
-        }
+            composable("live_data") {
+                LiveDataScreen(
+                    navController = navController,
+                    viewModel = mainViewModel
+                )
+            }
 
-        composable("ai_analysis") {
-            AiAnalysisScreen(
-                navController = navController,
-                viewModel = mainViewModel
-            )
-        }
+            composable("ai_analysis") {
+                AiAnalysisScreen(
+                    navController = navController,
+                    viewModel = mainViewModel
+                )
+            }
 
-        composable("ai_chat") {
-            AiChatScreen(
-                navController = navController,
-                viewModel = mainViewModel
-            )
-        }
+            composable("ai_chat") {
+                AiChatScreen(
+                    navController = navController,
+                    viewModel = mainViewModel
+                )
+            }
 
-        composable("settings") {
-            SettingsScreen(
-                navController = navController,
-                viewModel = mainViewModel
-            )
-        }
+            composable("settings") {
+                SettingsScreen(
+                    navController = navController,
+                    viewModel = mainViewModel
+                )
+            }
 
-        composable("connection") {
-            ConnectionScreen(
-                navController = navController,
-                viewModel = mainViewModel
-            )
+            composable("connection") {
+                ConnectionScreen(
+                    navController = navController,
+                    viewModel = mainViewModel
+                )
+            }
         }
     }
 }

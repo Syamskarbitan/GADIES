@@ -26,7 +26,6 @@ import com.gadies.suzuki.data.model.PidCategory
 import com.gadies.suzuki.data.model.PidData
 import com.gadies.suzuki.ui.theme.GadiesColors
 import com.gadies.suzuki.ui.viewmodel.MainViewModel
-import com.gadies.suzuki.ui.components.GaugeView
 import com.gadies.suzuki.data.model.ConnectionStatus
 import java.text.SimpleDateFormat
 import java.util.*
@@ -319,13 +318,10 @@ fun PidDataRow(
                     // Value display
                     if (pidData.hasData) {
                         if (pidData.uiType == "gauge") {
-                            GaugeView(
-                                value = pidData.currentValue,
-                                minValue = pidData.threshold?.min ?: 0.0,
-                                maxValue = pidData.threshold?.max ?: 100.0,
+                            com.gadies.suzuki.ui.components.GaugeView(
+                                value = pidData.currentValue.toFloat(),
+                                maxValue = pidData.threshold?.max?.toFloat() ?: 100f,
                                 unit = pidData.unit,
-                                title = pidData.name,
-                                size = if (pidData.category == PidCategory.ENGINE) 200 else 160,
                                 modifier = Modifier.padding(8.dp)
                             )
                         } else {
