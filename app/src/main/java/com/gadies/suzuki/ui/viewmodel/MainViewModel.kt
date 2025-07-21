@@ -208,24 +208,35 @@ class MainViewModel @Inject constructor(
     
     // Connection Management - Real Bluetooth scanning
     fun scanForDevices() {
-        val service = obdService
-        if (service != null) {
-            // startBluetoothScan() handles errors internally via connection state
-            service.startBluetoothScan()
-        } else {
-            // ObdService not available
-            _connectionState.value = _connectionState.value.copy(
+        if (obdService == null) {
+            _connectionState.value = ConnectionState(
                 status = ConnectionStatus.ERROR,
-                errorMessage = "OBD service not available"
+                errorMessage = "OBD Service not available. Please restart the app."
             )
+        } else {
+            obdService?.startBluetoothScan()
         }
     }
 
     fun stopScan() {
-        obdService?.stopBluetoothScan()
+        if (obdService == null) {
+            _connectionState.value = ConnectionState(
+                status = ConnectionStatus.ERROR,
+                errorMessage = "OBD Service not available. Please restart the app."
+            )
+        } else {
+            obdService?.stopBluetoothScan()
+        }
     }
 
     fun connectToDevice(device: ObdDevice) {
+        if (obdService == null) {
+            _connectionState.value = ConnectionState(
+                status = ConnectionStatus.ERROR,
+                errorMessage = "OBD Service not available. Please restart the app."
+            )
+            return
+        }
         // Set state to connecting immediately for responsive UI
         _connectionState.value = _connectionState.value.copy(
             status = ConnectionStatus.CONNECTING,
@@ -239,6 +250,13 @@ class MainViewModel @Inject constructor(
     }
 
     fun connectToWiFi(ip: String, port: Int) {
+        if (obdService == null) {
+            _connectionState.value = ConnectionState(
+                status = ConnectionStatus.ERROR,
+                errorMessage = "OBD Service not available. Please restart the app."
+            )
+            return
+        }
         val wifiDevice = ObdDevice(name = "WiFi OBD Reader", address = "$ip:$port", type = ConnectionType.WIFI)
         // Set state to connecting immediately for responsive UI
         _connectionState.value = _connectionState.value.copy(
@@ -253,11 +271,25 @@ class MainViewModel @Inject constructor(
     }
 
     fun disconnectObd() {
-        obdService?.disconnect()
+        if (obdService == null) {
+            _connectionState.value = ConnectionState(
+                status = ConnectionStatus.ERROR,
+                errorMessage = "OBD Service not available. Please restart the app."
+            )
+        } else {
+            obdService?.disconnect()
+        }
     }
 
     fun connectDirectly() {
-        obdService?.connectDirectly("00:1D:A5:68:D0:34")
+        if (obdService == null) {
+            _connectionState.value = ConnectionState(
+                status = ConnectionStatus.ERROR,
+                errorMessage = "OBD Service not available. Please restart the app."
+            )
+        } else {
+            obdService?.connectDirectly("00:1D:A5:68:D0:34")
+        }
     }
 
     // Settings Management (DIUBAH: Menggunakan _settings yang benar)
